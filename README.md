@@ -22,32 +22,6 @@
 - **HTTP 客户端**: Axios
 - **图标**: Element Plus Icons
 
-## 数据库结构
-
-基于以下数据库表结构设计：
-
-```sql
-CREATE TABLE `prompt` (
-  `id` int(11) NOT NULL AUTO_INCREMENT,
-  `name` varchar(255) COLLATE utf8mb4_bin DEFAULT NULL COMMENT '唯一标识符',
-  `title` varchar(255) COLLATE utf8mb4_bin DEFAULT NULL COMMENT '显示标题',
-  `type` varchar(255) COLLATE utf8mb4_bin DEFAULT NULL,
-  `model` varchar(255) COLLATE utf8mb4_bin DEFAULT NULL,
-  `return_type` varchar(255) COLLATE utf8mb4_bin DEFAULT NULL,
-  `template` text COLLATE utf8mb4_bin,
-  `mock` tinyint(1) DEFAULT '1',
-  `mock_data` json DEFAULT NULL,
-  `remark` varchar(255) COLLATE utf8mb4_bin DEFAULT NULL,
-  `format_type` enum('square_brackets','braces','none') COLLATE utf8mb4_bin NOT NULL DEFAULT 'braces',
-  `ai_provider` varchar(20) COLLATE utf8mb4_bin DEFAULT NULL,
-  `version` int(11) DEFAULT '1' COMMENT '版本号',
-  `created_at` timestamp NULL DEFAULT CURRENT_TIMESTAMP,
-  `updated_at` timestamp NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-  PRIMARY KEY (`id`),
-  UNIQUE KEY `uk_name` (`name`)
-) ENGINE=InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_bin;
-```
-
 ## 快速开始
 
 ### 安装依赖
