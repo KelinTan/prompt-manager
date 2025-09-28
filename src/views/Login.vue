@@ -71,7 +71,7 @@
     </div>
 
     <div class="login-footer">
-      <p>&copy; 2024 Prompt Manager. All rights reserved.</p>
+      <p>&copy; 2025 Prompt Manager. All rights reserved.</p>
     </div>
   </div>
 </template>
