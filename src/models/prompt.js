@@ -53,9 +53,7 @@ export const FORMAT_TYPE_OPTIONS = [
 export const AI_PROVIDER_OPTIONS = [
   { label: 'OpenAI', value: 'openai' },
   { label: 'DashScope', value: 'dashscope' },
-  { label: 'Claude', value: 'claude' },
-  { label: 'Gemini', value: 'gemini' },
-  { label: 'ChatGLM', value: 'chatglm' }
+  { label: 'Deepseek', value: 'deepseek' }
 ]
 
 // 返回类型选项

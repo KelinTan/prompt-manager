@@ -21,7 +21,7 @@ export const promptApi = {
 
   // 更新prompt
   async updatePrompt(id, data) {
-    const response = await api.put(`/admin/api/prompts/${id}`, data)
+    const response = await api.put(`/prompts/${id}`, data)
     return response.data
   },
 

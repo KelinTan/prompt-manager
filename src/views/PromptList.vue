@@ -14,19 +14,44 @@
         <!-- 中间搜索区域 -->
         <div class="header-center">
           <div class="search-container">
-            <el-input 
-              v-model="searchForm.title" 
-              placeholder="搜索 Prompt..."
-              class="search-input"
-              size="large"
-              clearable
-              @clear="handleSearch"
-              @keyup.enter="handleSearch"
-            >
-              <template #prefix>
-                <el-icon class="search-icon"><Search /></el-icon>
-              </template>
-            </el-input>
+            <div class="search-row">
+              <el-input 
+                v-model="searchForm.title" 
+                placeholder="搜索 Prompt..."
+                class="search-input"
+                size="large"
+                clearable
+                @clear="handleSearch"
+                @keyup.enter="handleSearch"
+              >
+                <template #prefix>
+                  <el-icon class="search-icon"><Search /></el-icon>
+                </template>
+              </el-input>
+              <el-select
+                v-model="searchForm.ai_provider"
+                placeholder="选择供应商"
+                class="provider-select"
+                size="large"
+                clearable
+                @change="handleSearch"
+                @clear="handleSearch"
+              >
+                <el-option
+                  v-for="option in aiProviderOptions"
+                  :key="option.value"
+                  :label="option.label"
+                  :value="option.value"
+                />
+              </el-select>
+              <el-button 
+                size="large" 
+                @click="handleReset"
+                class="reset-btn"
+              >
+                重置
+              </el-button>
+            </div>
           </div>
         </div>
         
@@ -172,7 +197,7 @@ import { ref, reactive, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
 import { ElMessage, ElMessageBox } from 'element-plus'
 import { promptApi } from '@/api/prompt'
-import { FORMAT_TYPE_OPTIONS } from '@/models/prompt'
+import { FORMAT_TYPE_OPTIONS, AI_PROVIDER_OPTIONS } from '@/models/prompt'
 
 export default {
   name: 'PromptList',
@@ -184,7 +209,8 @@ export default {
 
     // 搜索表单
     const searchForm = reactive({
-      title: ''
+      title: '',
+      ai_provider: ''
     })
 
     // 分页
@@ -195,7 +221,7 @@ export default {
     })
 
     // AI提供商选项
-
+    const aiProviderOptions = AI_PROVIDER_OPTIONS
 
     // 获取格式类型标签
     const getFormatTypeLabel = (value) => {
@@ -245,6 +271,7 @@ export default {
     // 重置搜索
     const handleReset = () => {
       searchForm.title = ''
+      searchForm.ai_provider = ''
       handleSearch()
     }
 
@@ -327,6 +354,7 @@ export default {
       pagination,
 
       publishingIds,
+      aiProviderOptions,
       getFormatTypeLabel,
       formatDate,
       handleSearch,
@@ -399,7 +427,38 @@ export default {
 
 .search-container {
   width: 100%;
-  max-width: 400px;
+  max-width: 600px;
+}
+
+.search-row {
+  display: flex;
+  gap: var(--spacing-md);
+  align-items: center;
+}
+
+.search-input {
+  flex: 2;
+  min-width: 200px;
+}
+
+.provider-select {
+  flex: 1;
+  min-width: 150px;
+}
+
+.reset-btn {
+  flex-shrink: 0;
+  background: var(--bg-secondary);
+  border: 1px solid var(--border-color);
+  color: var(--text-secondary);
+  border-radius: var(--radius-lg);
+  transition: all 0.2s ease;
+}
+
+.reset-btn:hover {
+  background: var(--bg-tertiary);
+  border-color: var(--primary-light);
+  color: var(--text-primary);
 }
 
 /* 右侧操作区域 */
@@ -479,6 +538,45 @@ export default {
 .search-icon {
   color: var(--text-secondary);
   font-size: 18px;
+}
+
+/* 供应商选择器样式 */
+:deep(.provider-select .el-input__wrapper) {
+  border-radius: var(--radius-xl);
+  border: 2px solid var(--border-color);
+  background: var(--bg-secondary);
+  padding: 0 var(--spacing-md);
+  height: 48px;
+  transition: all 0.2s ease;
+  box-shadow: var(--shadow-sm);
+}
+
+:deep(.provider-select .el-input__wrapper:hover) {
+  border-color: var(--primary-color);
+  background: var(--bg-primary);
+  box-shadow: var(--shadow-md);
+}
+
+:deep(.provider-select .el-input__wrapper.is-focus) {
+  border-color: var(--primary-color);
+  background: var(--bg-primary);
+  box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.1);
+  transform: translateY(-1px);
+}
+
+:deep(.provider-select .el-input__inner) {
+  border: none;
+  background: transparent;
+  box-shadow: none;
+  font-size: 16px;
+  color: var(--text-primary);
+  height: 100%;
+  line-height: 1.5;
+}
+
+:deep(.provider-select .el-input__inner::placeholder) {
+  color: var(--text-muted);
+  font-size: 15px;
 }
 
 
@@ -783,6 +881,17 @@ export default {
   
   .search-container {
     max-width: 500px;
+  }
+  
+  .search-row {
+    flex-direction: column;
+    gap: var(--spacing-sm);
+  }
+  
+  .search-input,
+  .provider-select {
+    flex: none;
+    width: 100%;
   }
   
   .header-left,

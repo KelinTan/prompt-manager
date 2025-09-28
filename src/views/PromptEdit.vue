@@ -123,10 +123,10 @@
             </el-form-item>
           </el-col>
           <el-col :span="12">
-            <el-form-item label="格式类型" prop="format_type">
+            <el-form-item label="格式化类型" prop="format_type">
               <el-select 
                 v-model="form.format_type" 
-                placeholder="请选择格式类型"
+                placeholder="请选择格式化类型"
                 style="width: 100%"
               >
                 <el-option 
@@ -237,6 +237,22 @@ export default {
         { required: true, message: '请输入唯一标识', trigger: 'blur' },
         { max: 255, message: '唯一标识长度不能超过255个字符', trigger: 'blur' },
         { pattern: /^[a-zA-Z][a-zA-Z0-9_]*$/, message: '唯一标识必须以字母开头，只能包含字母、数字和下划线', trigger: 'blur' }
+      ],
+      type: [
+        { required: true, message: '请选择Prompt类型', trigger: 'change' }
+      ],
+      model: [
+        { required: true, message: '请输入模型名称', trigger: 'blur' },
+        { max: 255, message: '模型名称长度不能超过255个字符', trigger: 'blur' }
+      ],
+      ai_provider: [
+        { required: true, message: '请选择AI提供商', trigger: 'change' }
+      ],
+      return_type: [
+        { required: true, message: '请选择返回类型', trigger: 'change' }
+      ],
+      format_type: [
+        { required: true, message: '请选择格式化类型', trigger: 'change' }
       ],
       template: [
         { required: true, message: '请输入模板内容', trigger: 'blur' }
