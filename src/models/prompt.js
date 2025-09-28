@@ -8,7 +8,6 @@ export class Prompt {
     this.model = data.model || ''
     this.return_type = data.return_type || ''
     this.template = data.template || ''
-    this.parameters = data.parameters || []
     this.mock = data.mock !== undefined ? data.mock : true
     this.mock_data = data.mock_data || {}
     this.remark = data.remark || ''
@@ -40,11 +39,7 @@ export class Prompt {
     return errors
   }
 
-  // 获取参数字符串（用于显示）
-  getParametersString() {
-    if (!this.parameters || this.parameters.length === 0) return '无'
-    return this.parameters.map(p => p.name || p).join(', ')
-  }
+
 }
 
 // 格式类型选项

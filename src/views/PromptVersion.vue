@@ -81,23 +81,7 @@
         </div>
 
         <!-- 参数列表 -->
-        <div v-if="promptData.parameters && promptData.parameters.length > 0" class="parameters-section">
-          <h3>参数列表</h3>
-          <el-table :data="promptData.parameters" border>
-            <el-table-column type="index" label="序号" width="60" />
-            <el-table-column prop="name" label="参数名" width="200" />
-            <el-table-column prop="type" label="类型" width="150" />
-            <el-table-column prop="description" label="描述" show-overflow-tooltip />
-            <el-table-column prop="required" label="必填" width="80">
-              <template #default="{ row }">
-                <el-tag :type="row.required ? 'danger' : 'info'" size="small">
-                  {{ row.required ? '是' : '否' }}
-                </el-tag>
-              </template>
-            </el-table-column>
-            <el-table-column prop="default_value" label="默认值" width="150" />
-          </el-table>
-        </div>
+
 
         <!-- Mock数据 -->
         <div v-if="promptData.mock && promptData.mock_data" class="mock-section">
@@ -194,13 +178,7 @@ export default {
         const data = await promptApi.getPromptVersion(promptId, version)
         promptData.value = data
         
-        // 处理参数数据
-        if (promptData.value.parameters && typeof promptData.value.parameters === 'string') {
-          promptData.value.parameters = JSON.parse(promptData.value.parameters)
-        }
-        if (!Array.isArray(promptData.value.parameters)) {
-          promptData.value.parameters = []
-        }
+
 
         // 处理Mock数据显示
         if (promptData.value.mock_data) {
@@ -383,7 +361,7 @@ export default {
   resize: none;
 }
 
-.parameters-section :deep(.el-table) {
+.mock-section :deep(.el-table) {
   font-size: 13px;
 }
 

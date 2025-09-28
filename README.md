@@ -60,10 +60,6 @@ npm install
 # 开发环境
 npm run dev
 
-# 测试环境
-npm run dev:test
-```
-
 项目将在 `http://localhost:3000` 启动。
 
 ### 构建不同环境版本
@@ -71,9 +67,6 @@ npm run dev:test
 ```bash
 # 构建生产环境
 npm run build
-
-# 构建测试环境
-npm run build:test
 
 # 构建开发环境
 npm run build:dev
@@ -84,9 +77,6 @@ npm run build:dev
 ```bash
 # 预览生产环境构建
 npm run preview
-
-# 预览测试环境构建
-npm run preview:test
 ```
 
 ## 项目结构
@@ -181,81 +171,4 @@ prompt-manager/
 ### 环境变量文件
 
 - `.env.development` - 开发环境配置
-- `.env.test` - 测试环境配置  
 - `.env.production` - 生产环境配置
-
-### 可配置变量
-
-- `VITE_API_BASE_URL` - 后端API基础地址（包含/api路径）
-- `VITE_APP_TITLE` - 应用标题
-
-### 环境切换
-
-```bash
-# 开发环境（直接访问 localhost:8080/api）
-npm run dev
-
-# 测试环境
-npm run dev:test
-
-# 生产环境构建
-npm run build
-
-# 测试环境构建
-npm run build:test
-```
-
-## 部署说明
-
-1. 根据目标环境构建项目：
-   ```bash
-   # 生产环境
-   npm run build
-   
-   # 测试环境
-   npm run build:test
-   ```
-
-2. 将 `dist` 目录部署到 Web 服务器
-
-3. 配置 nginx 或其他 Web 服务器的路由重写规则，支持 SPA 路由
-
-4. 确保 `.env.production` 或 `.env.test` 中的 `VITE_API_BASE_URL` 指向正确的后端服务地址（包含/api路径）
-
-### API接口地址说明
-
-前端将直接访问以下格式的接口：
-- 开发环境: `http://localhost:8080/api/prompts`
-- 生产环境: `https://api.yourcompany.com/api/prompts`
-
-确保后端服务提供以下接口：
-- `GET /api/prompts` - 获取Prompt列表
-- `GET /api/prompts/:id` - 获取单个Prompt
-- `POST /api/prompts` - 创建Prompt
-- `PUT /api/prompts/:id` - 更新Prompt
-- `DELETE /api/prompts/:id` - 删除Prompt
-- `POST /api/prompts/:id/publish` - 发布Prompt
-- `GET /api/prompts/:id/history` - 获取历史版本
-- `GET /api/prompts/:id/versions/:version` - 获取特定版本
-
-## 注意事项
-
-- 本项目暂未接入登录系统，无权限校验
-- Mock 数据需要符合 JSON 格式
-- 参数配置支持动态添加，建议定义参数类型和描述
-- 版本管理采用递增策略，发布后版本号自动+1
-- 建议配置适当的错误处理和加载状态
-
-## 后续扩展
-
-- [ ] 用户登录和权限管理
-- [ ] Prompt 分类和标签系统
-- [ ] 更丰富的版本对比功能
-- [ ] 导入/导出功能
-- [ ] API 文档生成
-- [ ] 单元测试覆盖
-- [ ] Docker 容器化部署
-
-## 许可证
-
-MIT License

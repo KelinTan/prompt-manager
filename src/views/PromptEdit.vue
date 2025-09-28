@@ -143,54 +143,7 @@
           />
         </el-form-item>
 
-        <el-form-item label="参数">
-          <div class="parameters-container">
-            <div class="parameters-header">
-              <span>参数列表</span>
-              <el-button 
-                type="primary" 
-                size="small" 
-                @click="addParameter"
-              >
-                <el-icon><Plus /></el-icon>
-                添加参数
-              </el-button>
-            </div>
-            <div v-if="form.parameters.length === 0" class="empty-parameters">
-              暂无参数，点击上方按钮添加
-            </div>
-            <div v-else class="parameters-list">
-              <div 
-                v-for="(param, index) in form.parameters" 
-                :key="index"
-                class="parameter-item"
-              >
-                <el-input 
-                  v-model="param.name" 
-                  placeholder="参数名"
-                  style="width: 200px; margin-right: 10px;"
-                />
-                <el-input 
-                  v-model="param.type" 
-                  placeholder="参数类型"
-                  style="width: 150px; margin-right: 10px;"
-                />
-                <el-input 
-                  v-model="param.description" 
-                  placeholder="参数描述"
-                  style="width: 300px; margin-right: 10px;"
-                />
-                <el-button 
-                  type="danger" 
-                  size="small" 
-                  @click="removeParameter(index)"
-                >
-                  <el-icon><Delete /></el-icon>
-                </el-button>
-              </div>
-            </div>
-          </div>
-        </el-form-item>
+
 
         <el-row :gutter="20">
           <el-col :span="12">
@@ -290,13 +243,7 @@ export default {
         const data = await promptApi.getPrompt(promptId.value)
         Object.assign(form, new Prompt(data))
         
-        // 处理参数数据
-        if (form.parameters && typeof form.parameters === 'string') {
-          form.parameters = JSON.parse(form.parameters)
-        }
-        if (!Array.isArray(form.parameters)) {
-          form.parameters = []
-        }
+
 
         // 处理Mock数据
         if (form.mock_data) {
@@ -312,19 +259,7 @@ export default {
       }
     }
 
-    // 添加参数
-    const addParameter = () => {
-      form.parameters.push({
-        name: '',
-        type: '',
-        description: ''
-      })
-    }
 
-    // 删除参数
-    const removeParameter = (index) => {
-      form.parameters.splice(index, 1)
-    }
 
     // 验证Mock数据
     const validateMockData = () => {
@@ -357,12 +292,6 @@ export default {
         saving.value = true
         
         const submitData = { ...form }
-        
-        // 处理参数数据
-        if (submitData.parameters && submitData.parameters.length > 0) {
-          // 过滤空参数
-          submitData.parameters = submitData.parameters.filter(p => p.name.trim())
-        }
 
         if (isEdit.value) {
           await promptApi.updatePrompt(promptId.value, submitData)
@@ -431,8 +360,6 @@ export default {
       formatTypeOptions,
       returnTypeOptions,
       rules,
-      addParameter,
-      removeParameter,
       validateMockData,
       handleSave,
       handlePublish,
@@ -465,42 +392,7 @@ export default {
   gap: 10px;
 }
 
-.parameters-container {
-  width: 100%;
-  border: 1px solid #dcdfe6;
-  border-radius: 4px;
-  padding: 15px;
-  background-color: #fafafa;
-}
 
-.parameters-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-bottom: 15px;
-  font-weight: 500;
-}
-
-.empty-parameters {
-  text-align: center;
-  color: #909399;
-  padding: 20px;
-}
-
-.parameters-list {
-  display: flex;
-  flex-direction: column;
-  gap: 10px;
-}
-
-.parameter-item {
-  display: flex;
-  align-items: center;
-  padding: 10px;
-  background-color: white;
-  border-radius: 4px;
-  border: 1px solid #e4e7ed;
-}
 
 .error-text {
   color: #f56c6c;

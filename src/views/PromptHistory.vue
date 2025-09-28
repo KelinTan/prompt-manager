@@ -122,14 +122,7 @@
           />
         </div>
 
-        <div v-if="selectedVersion.parameters && selectedVersion.parameters.length > 0" class="parameters-section">
-          <h4>参数列表</h4>
-          <el-table :data="selectedVersion.parameters" border>
-            <el-table-column prop="name" label="参数名" width="150" />
-            <el-table-column prop="type" label="类型" width="120" />
-            <el-table-column prop="description" label="描述" />
-          </el-table>
-        </div>
+
 
         <div v-if="selectedVersion.mock && selectedVersion.mock_data" class="mock-section">
           <h4>Mock 数据</h4>
@@ -404,7 +397,7 @@ export default {
 }
 
 .version-detail .template-section,
-.version-detail .parameters-section,
+
 .version-detail .mock-section {
   margin-top: 20px;
 }
