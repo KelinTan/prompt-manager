@@ -151,7 +151,7 @@ export default {
               errorMessage = '用户名或密码错误'
               break
             case 403:
-              errorMessage = '账户被禁用，请联系管理员'
+              errorMessage = '账户无权限登录，请联系管理员'
               break
             case 429:
               errorMessage = '登录次数过多，请稍后再试'
