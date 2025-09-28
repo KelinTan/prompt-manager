@@ -1,0 +1,26 @@
+{
+  "name": "prompt-manager",
+  "private": true,
+  "version": "0.0.0",
+  "type": "module",
+  "scripts": {
+    "dev": "vite --mode development",
+    "dev:test": "vite --mode test",
+    "build": "vite build --mode production",
+    "build:test": "vite build --mode test",
+    "build:dev": "vite build --mode development",
+    "preview": "vite preview",
+    "preview:test": "vite preview --mode test"
+  },
+  "dependencies": {
+    "vue": "^3.4.29",
+    "vue-router": "^4.3.3",
+    "element-plus": "^2.7.6",
+    "axios": "^1.7.2",
+    "@element-plus/icons-vue": "^2.3.1"
+  },
+  "devDependencies": {
+    "@vitejs/plugin-vue": "^5.0.5",
+    "vite": "^5.3.1"
+  }
+}
