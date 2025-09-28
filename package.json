@@ -7,7 +7,7 @@
     "dev": "vite --mode development",
     "build:prod": "vite build --mode production",
     "build:beta": "vite build --mode beta",
-    "preview": "vite preview",
+    "preview": "vite preview"
   },
   "dependencies": {
     "vue": "^3.4.29",
