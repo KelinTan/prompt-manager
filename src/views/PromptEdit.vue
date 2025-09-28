@@ -11,14 +11,15 @@
         >
           保存
         </el-button>
-        <el-button 
+        <!-- 发布功能暂未开发，暂时隐藏 -->
+        <!-- <el-button 
           v-if="isEdit"
           type="success" 
           @click="handlePublish"
           :loading="publishing"
         >
           发布
-        </el-button>
+        </el-button> -->
       </div>
     </div>
 
@@ -56,12 +57,18 @@
         <el-row :gutter="20">
           <el-col :span="12">
             <el-form-item label="类型" prop="type">
-              <el-input 
+              <el-select 
                 v-model="form.type" 
-                placeholder="请输入类型"
-                maxlength="255"
-                show-word-limit
-              />
+                placeholder="请选择类型"
+                style="width: 100%"
+              >
+                <el-option 
+                  v-for="option in typeOptions" 
+                  :key="option.value" 
+                  :label="option.label" 
+                  :value="option.value"
+                />
+              </el-select>
             </el-form-item>
           </el-col>
           <el-col :span="12">
@@ -137,9 +144,10 @@
           <el-input 
             v-model="form.template" 
             type="textarea" 
-            :rows="8"
+            :autosize="{ minRows: 8, maxRows: 20 }"
             placeholder="请输入Prompt模板内容"
             show-word-limit
+            resize="vertical"
           />
         </el-form-item>
 
@@ -190,7 +198,7 @@ import { ref, reactive, computed, onMounted } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { ElMessage, ElMessageBox } from 'element-plus'
 import { promptApi } from '@/api/prompt'
-import { Prompt, AI_PROVIDER_OPTIONS, FORMAT_TYPE_OPTIONS, RETURN_TYPE_OPTIONS } from '@/models/prompt'
+import { Prompt, AI_PROVIDER_OPTIONS, FORMAT_TYPE_OPTIONS, RETURN_TYPE_OPTIONS, PROMPT_TYPE_OPTIONS } from '@/models/prompt'
 
 export default {
   name: 'PromptEdit',
@@ -217,6 +225,7 @@ export default {
     const aiProviderOptions = AI_PROVIDER_OPTIONS
     const formatTypeOptions = FORMAT_TYPE_OPTIONS
     const returnTypeOptions = RETURN_TYPE_OPTIONS
+    const typeOptions = PROMPT_TYPE_OPTIONS
 
     // 验证规则
     const rules = {
@@ -312,30 +321,31 @@ export default {
 
     // 发布
     const handlePublish = async () => {
-      try {
-        await ElMessageBox.confirm(
-          `确定要发布Prompt "${form.title || form.name}" 吗？发布后版本号将+1。`,
-          '确认发布',
-          {
-            confirmButtonText: '确定',
-            cancelButtonText: '取消',
-            type: 'warning'
-          }
-        )
+      ElMessage.info('发布功能暂未开发，敬请期待')
+      // try {
+      //   await ElMessageBox.confirm(
+      //     `确定要发布Prompt "${form.title || form.name}" 吗？发布后版本号将+1。`,
+      //     '确认发布',
+      //     {
+      //       confirmButtonText: '确定',
+      //       cancelButtonText: '取消',
+      //       type: 'warning'
+      //     }
+      //   )
 
-        publishing.value = true
-        await promptApi.publishPrompt(promptId.value)
-        ElMessage.success('发布成功')
+      //   publishing.value = true
+      //   await promptApi.publishPrompt(promptId.value)
+      //   ElMessage.success('发布成功')
         
-        // 重新加载数据
-        await loadData()
-      } catch (error) {
-        if (error !== 'cancel') {
-          ElMessage.error('发布失败: ' + error.message)
-        }
-      } finally {
-        publishing.value = false
-      }
+      //   // 重新加载数据
+      //   await loadData()
+      // } catch (error) {
+      //   if (error !== 'cancel') {
+      //     ElMessage.error('发布失败: ' + error.message)
+      //   }
+      // } finally {
+      //   publishing.value = false
+      // }
     }
 
     // 返回
@@ -359,6 +369,7 @@ export default {
       aiProviderOptions,
       formatTypeOptions,
       returnTypeOptions,
+      typeOptions,
       rules,
       validateMockData,
       handleSave,
@@ -406,5 +417,28 @@ export default {
 
 :deep(.el-textarea__inner) {
   font-family: 'Monaco', 'Menlo', 'Ubuntu Mono', monospace;
+  line-height: 1.6;
+  font-size: 14px;
+}
+
+/* 专门为模板字段优化 */
+:deep(.el-form-item:has([prop="template"]) .el-textarea__inner) {
+  min-height: 200px;
+  max-height: 500px;
+  line-height: 1.8;
+  font-size: 14px;
+  padding: 16px;
+  border-radius: 8px;
+  border: 2px solid #e4e7ed;
+  transition: border-color 0.2s ease;
+}
+
+:deep(.el-form-item:has([prop="template"]) .el-textarea__inner:focus) {
+  border-color: #409eff;
+  box-shadow: 0 0 0 2px rgba(64, 158, 255, 0.1);
+}
+
+:deep(.el-form-item:has([prop="template"]) .el-textarea__inner:hover) {
+  border-color: #c0c4cc;
 }
 </style>

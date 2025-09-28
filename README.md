@@ -5,13 +5,13 @@
 ## 功能特性
 
 - ✅ **Prompt 管理**: 支持 Prompt 的增删改查操作
-- ✅ **版本控制**: 支持 Prompt 版本管理，发布时自动版本号+1
-- ✅ **历史记录**: 可查看 Prompt 的历史版本和变更记录
-- ✅ **版本对比**: 支持不同版本之间的内容对比
-- ✅ **搜索过滤**: 支持按名称、类型、AI提供商等条件搜索
+- ✅ **标题和标识**: 支持设置标题（用于显示）和唯一标识（系统标识符）
+- ✅ **搜索功能**: 支持按标题搜索 Prompt
 - ✅ **Mock 数据**: 支持配置和管理 Mock 数据
-- ✅ **参数管理**: 支持动态参数配置和管理
-- ✅ **响应式设计**: 适配不同屏幕尺寸
+- ✅ **响应式设计**: 适配不同屏幕尺寸，现代化 UI 设计
+- 🚧 **版本控制**: 支持 Prompt 版本管理，发布时自动版本号+1（暂未开发）
+- 🚧 **历史记录**: 可查看 Prompt 的历史版本和变更记录（暂未开发）
+- 🚧 **版本对比**: 支持不同版本之间的内容对比（暂未开发）
 
 ## 技术栈
 
@@ -29,21 +29,23 @@
 ```sql
 CREATE TABLE `prompt` (
   `id` int(11) NOT NULL AUTO_INCREMENT,
-  `name` varchar(255) COLLATE utf8mb4_bin DEFAULT NULL,
+  `name` varchar(255) COLLATE utf8mb4_bin DEFAULT NULL COMMENT '唯一标识符',
+  `title` varchar(255) COLLATE utf8mb4_bin DEFAULT NULL COMMENT '显示标题',
   `type` varchar(255) COLLATE utf8mb4_bin DEFAULT NULL,
   `model` varchar(255) COLLATE utf8mb4_bin DEFAULT NULL,
   `return_type` varchar(255) COLLATE utf8mb4_bin DEFAULT NULL,
   `template` text COLLATE utf8mb4_bin,
-  `parameters` json DEFAULT NULL,
   `mock` tinyint(1) DEFAULT '1',
   `mock_data` json DEFAULT NULL,
   `remark` varchar(255) COLLATE utf8mb4_bin DEFAULT NULL,
   `format_type` enum('square_brackets','braces','none') COLLATE utf8mb4_bin NOT NULL DEFAULT 'braces',
   `ai_provider` varchar(20) COLLATE utf8mb4_bin DEFAULT NULL,
-  `created_at` timestamp NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-  `updated_at` timestamp NULL DEFAULT NULL ON UPDATE CURRENT_TIMESTAMP,
-  PRIMARY KEY (`id`)
-) ENGINE=InnoDB AUTO_INCREMENT=81 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_bin;
+  `version` int(11) DEFAULT '1' COMMENT '版本号',
+  `created_at` timestamp NULL DEFAULT CURRENT_TIMESTAMP,
+  `updated_at` timestamp NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `uk_name` (`name`)
+) ENGINE=InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_bin;
 ```
 
 ## 快速开始
@@ -109,25 +111,25 @@ prompt-manager/
 ## 页面说明
 
 ### 1. Prompt 列表页 (`/prompts`)
-- 显示所有 Prompt 的列表
-- 支持按名称、类型、AI提供商搜索
+- 显示所有 Prompt 的卡片式列表
+- 支持按标题搜索
 - 支持分页显示
-- 提供编辑、发布、查看历史、删除等操作
+- 提供编辑、删除等操作
+- 发布和历史功能暂时显示"暂未开发"提示
 
 ### 2. Prompt 编辑页 (`/prompts/create` | `/prompts/:id/edit`)
 - 创建新的 Prompt 或编辑现有 Prompt
-- 包含所有字段的表单：名称、类型、模型、模板等
-- 支持动态添加/删除参数
+- 包含字段：标题、唯一标识、类型、模型、返回类型、AI提供商、格式类型、模板内容等
 - 支持 Mock 数据配置
-- 提供保存和发布功能
+- 提供保存功能，发布功能暂时显示"暂未开发"提示
 
-### 3. 历史版本页 (`/prompts/:id/history`)
+### 3. 历史版本页 (`/prompts/:id/history`) - 暂未开发
 - 显示 Prompt 的所有历史版本
 - 时间线形式展示版本变更
 - 支持查看版本详情和版本对比
 - 显示当前版本状态
 
-### 4. 版本详情页 (`/prompts/:id/versions/:version`)
+### 4. 版本详情页 (`/prompts/:id/versions/:version`) - 暂未开发
 - 显示特定版本的完整信息
 - 支持复制模板内容和 Mock 数据
 - 支持恢复历史版本
@@ -135,14 +137,16 @@ prompt-manager/
 
 ## API 接口说明
 
-项目通过代理配置连接后端 API，默认代理到 `http://localhost:8080`。
+项目直接调用后端 API，默认连接到 `http://localhost:8080/api`。
 
-主要接口：
-- `GET /api/prompts` - 获取 Prompt 列表
+### 已实现接口：
+- `GET /api/prompts` - 获取 Prompt 列表（支持分页，返回格式：{total, page, size, items}）
 - `GET /api/prompts/:id` - 获取单个 Prompt
 - `POST /api/prompts` - 创建 Prompt
 - `PUT /api/prompts/:id` - 更新 Prompt
 - `DELETE /api/prompts/:id` - 删除 Prompt
+
+### 暂未实现接口（待后续开发）：
 - `POST /api/prompts/:id/publish` - 发布 Prompt
 - `GET /api/prompts/:id/history` - 获取历史版本
 - `GET /api/prompts/:id/versions/:version` - 获取特定版本

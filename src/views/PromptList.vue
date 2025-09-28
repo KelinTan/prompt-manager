@@ -53,7 +53,7 @@
               <div class="card-subtitle">{{ prompt.name }}</div>
               <div class="card-meta">
                 <span class="prompt-type">{{ prompt.type || '未分类' }}</span>
-                <span class="version-badge">v{{ prompt.version || 1 }}</span>
+                <span class="version-badge">{{ prompt.version ? `v${prompt.version}` : 'latest' }}</span>
               </div>
             </div>
             <div class="card-status">
@@ -256,33 +256,35 @@ export default {
 
     // 发布
     const handlePublish = async (row) => {
-      try {
-        await ElMessageBox.confirm(
-          `确定要发布Prompt "${row.title || row.name}" 吗？发布后版本号将+1。`,
-          '确认发布',
-          {
-            confirmButtonText: '确定',
-            cancelButtonText: '取消',
-            type: 'warning'
-          }
-        )
+      ElMessage.info('发布功能暂未开发，敬请期待')
+      // try {
+      //   await ElMessageBox.confirm(
+      //     `确定要发布Prompt "${row.title || row.name}" 吗？发布后版本号将+1。`,
+      //     '确认发布',
+      //     {
+      //       confirmButtonText: '确定',
+      //       cancelButtonText: '取消',
+      //       type: 'warning'
+      //     }
+      //   )
 
-        publishingIds.value.add(row.id)
-        await promptApi.publishPrompt(row.id)
-        ElMessage.success('发布成功')
-        loadData() // 重新加载数据
-      } catch (error) {
-        if (error !== 'cancel') {
-          ElMessage.error('发布失败: ' + error.message)
-        }
-      } finally {
-        publishingIds.value.delete(row.id)
-      }
+      //   publishingIds.value.add(row.id)
+      //   await promptApi.publishPrompt(row.id)
+      //   ElMessage.success('发布成功')
+      //   loadData() // 重新加载数据
+      // } catch (error) {
+      //   if (error !== 'cancel') {
+      //     ElMessage.error('发布失败: ' + error.message)
+      //   }
+      // } finally {
+      //   publishingIds.value.delete(row.id)
+      // }
     }
 
     // 查看历史
     const handleHistory = (row) => {
-      router.push(`/prompts/${row.id}/history`)
+      ElMessage.info('历史版本功能暂未开发，敬请期待')
+      // router.push(`/prompts/${row.id}/history`)
     }
 
     // 删除
@@ -521,26 +523,10 @@ export default {
   overflow: hidden;
 }
 
-.prompt-card::before {
-  content: '';
-  position: absolute;
-  top: 0;
-  left: 0;
-  right: 0;
-  height: 3px;
-  background: var(--primary-gradient);
-  opacity: 0;
-  transition: opacity 0.2s ease;
-}
-
 .prompt-card:hover {
   transform: translateY(-4px);
   box-shadow: var(--shadow-xl);
   border-color: var(--primary-light);
-}
-
-.prompt-card:hover::before {
-  opacity: 1;
 }
 
 .card-header {

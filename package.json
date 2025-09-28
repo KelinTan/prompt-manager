@@ -5,12 +5,9 @@
   "type": "module",
   "scripts": {
     "dev": "vite --mode development",
-    "dev:test": "vite --mode test",
-    "build": "vite build --mode production",
-    "build:test": "vite build --mode test",
-    "build:dev": "vite build --mode development",
+    "build:prod": "vite build --mode production",
+    "build:beta": "vite build --mode beta",
     "preview": "vite preview",
-    "preview:test": "vite preview --mode test"
   },
   "dependencies": {
     "vue": "^3.4.29",

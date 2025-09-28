@@ -52,16 +52,20 @@ export const FORMAT_TYPE_OPTIONS = [
 // AI提供商选项
 export const AI_PROVIDER_OPTIONS = [
   { label: 'OpenAI', value: 'openai' },
+  { label: 'DashScope', value: 'dashscope' },
   { label: 'Claude', value: 'claude' },
   { label: 'Gemini', value: 'gemini' },
-  { label: 'ChatGLM', value: 'chatglm' },
-  { label: '其他', value: 'other' }
+  { label: 'ChatGLM', value: 'chatglm' }
 ]
 
 // 返回类型选项
 export const RETURN_TYPE_OPTIONS = [
-  { label: 'JSON', value: 'json' },
+  { label: 'JSON', value: 'json_object' },
+  { label: 'Text', value: 'text' }
+]
+
+// Prompt类型选项
+export const PROMPT_TYPE_OPTIONS = [
   { label: 'Text', value: 'text' },
-  { label: 'Markdown', value: 'markdown' },
-  { label: 'HTML', value: 'html' }
+  { label: 'Image', value: 'image' }
 ]

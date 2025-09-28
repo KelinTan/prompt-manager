@@ -1,0 +1,59 @@
+# GitLab CI/CD Pipeline for Application
+image: registry-mirrors.saybot.net/ops/ci/node20-ossutil:latest
+
+# 定义阶段
+stages:
+  - build
+  - deploy
+
+# 缓存 node_modules
+cache:
+  paths:
+    - node_modules/
+    - .npm/
+
+variables:
+  # npm 缓存配置
+  npm_config_cache: "$CI_PROJECT_DIR/.npm"
+  # 构建产物目录
+  BUILD_DIR: "dist"
+  APPLICATION_NAME: "prompt-manager"
+
+# 构建阶段
+build_beta:
+  stage: build
+  before_script:
+    - echo "开始构建应用..."
+    - node --version
+    - npm --version
+  script:
+    - echo "安装依赖..."
+    - npm ci --cache .npm --prefer-offline
+    - echo "构建项目..."
+    - npm run build:beta
+    - echo "构建完成，验证构建产物..."
+    - ls -la $BUILD_DIR/
+  artifacts:
+    paths:
+      - $BUILD_DIR/
+    expire_in: 1 hour
+  only:
+    - develop
+  tags:
+    - docker-ali
+
+# Beta 环境部署
+deploy_beta:
+  stage: deploy
+  dependencies:
+    - build_beta
+  before_script:
+  - ossutil config -e $OSS_ENDPOINT -i $OSS_ACCESS_KEY_ID -k $OSS_ACCESS_KEY_SECRET
+  script:
+  - ossutil sync $BUILD_DIR/ oss://$OSS_BUCKET_NAME/$APPLICATION_NAME/ --delete --force
+  environment:
+    name: beta
+  only:
+    - develop
+  tags:
+    - docker-ali
