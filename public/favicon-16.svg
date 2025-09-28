@@ -1,0 +1,8 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16" fill="none">
+  <!-- 简化版本的图标，适合小尺寸 -->
+  <circle cx="8" cy="8" r="8" fill="#6366F1"/>
+  <rect x="3" y="5" width="10" height="6" rx="1" fill="white" opacity="0.9"/>
+  <rect x="4" y="6" width="4" height="1" rx="0.5" fill="#6366F1"/>
+  <rect x="4" y="8" width="6" height="1" rx="0.5" fill="#6366F1" opacity="0.7"/>
+  <polygon points="6,11 8,11 7,13" fill="white" opacity="0.9"/>
+</svg>

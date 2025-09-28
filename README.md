@@ -175,4 +175,5 @@ prompt-manager/
 ### 环境变量文件
 
 - `.env.development` - 开发环境配置
+- `.env.beta` - 测试环境配置
 - `.env.production` - 生产环境配置

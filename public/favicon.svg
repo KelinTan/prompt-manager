@@ -1,0 +1,23 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32" fill="none">
+  <!-- 背景圆形 -->
+  <circle cx="16" cy="16" r="16" fill="url(#gradient)"/>
+  
+  <!-- 主图标 - 对话框样式 -->
+  <rect x="7" y="9" width="18" height="12" rx="3" fill="white" opacity="0.95"/>
+  
+  <!-- 文本线条 -->
+  <rect x="10" y="12" width="8" height="1.5" rx="0.75" fill="#6366F1"/>
+  <rect x="10" y="15" width="12" height="1.5" rx="0.75" fill="#6366F1" opacity="0.7"/>
+  <rect x="10" y="18" width="6" height="1.5" rx="0.75" fill="#6366F1" opacity="0.5"/>
+  
+  <!-- 对话框尾巴 -->
+  <polygon points="12,21 15,21 13.5,24" fill="white" opacity="0.95"/>
+  
+  <!-- 渐变定义 -->
+  <defs>
+    <linearGradient id="gradient" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#6366F1"/>
+      <stop offset="100%" style="stop-color:#8B5CF6"/>
+    </linearGradient>
+  </defs>
+</svg>

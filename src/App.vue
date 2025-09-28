@@ -1,8 +1,8 @@
 <template>
   <div id="app">
     <div class="app-layout">
-      <!-- 现代化顶部导航 -->
-      <header class="top-navbar">
+      <!-- 现代化顶部导航 - 登录页面时隐藏 -->
+      <header v-if="!isLoginPage" class="top-navbar">
         <div class="navbar-container">
           <div class="navbar-brand">
             <div class="brand-icon">
@@ -16,17 +16,32 @@
           </div>
           
           <div class="navbar-actions">
-            <el-button type="primary" class="create-btn" @click="$router.push('/prompts/create')">
-              <el-icon><Plus /></el-icon>
-              新建 Prompt
-            </el-button>
+            <div class="user-section">
+              <el-dropdown @command="handleUserCommand" trigger="click">
+                <div class="user-info">
+                  <el-avatar :size="32" class="user-avatar">
+                    <el-icon><User /></el-icon>
+                  </el-avatar>
+                  <span class="username">{{ authStore.user?.username || '用户' }}</span>
+                  <el-icon class="dropdown-icon"><ArrowDown /></el-icon>
+                </div>
+                <template #dropdown>
+                  <el-dropdown-menu>
+                    <el-dropdown-item command="logout">
+                      <el-icon><SwitchButton /></el-icon>
+                      退出登录
+                    </el-dropdown-item>
+                  </el-dropdown-menu>
+                </template>
+              </el-dropdown>
+            </div>
           </div>
         </div>
       </header>
       
       <!-- 主要内容区域 -->
-      <main class="main-content">
-        <div class="content-container">
+      <main class="main-content" :class="{ 'login-layout': isLoginPage }">
+        <div class="content-container" :class="{ 'login-container': isLoginPage }">
           <router-view />
         </div>
       </main>
@@ -36,15 +51,53 @@
 
 <script>
 import { computed } from 'vue'
-import config from '@/utils/config'
+import { useRoute, useRouter } from 'vue-router'
+import { ElMessage, ElMessageBox } from 'element-plus'
+import { config } from '@/utils/config'
+import { useAuthStore } from '@/stores/auth'
 
 export default {
   name: 'App',
   setup() {
+    const route = useRoute()
+    const router = useRouter()
+    const authStore = useAuthStore()
     const appTitle = computed(() => config.appTitle)
     
+    // 检查是否为登录页面
+    const isLoginPage = computed(() => route.path === '/login')
+    
+    // 用户操作处理
+    const handleUserCommand = async (command) => {
+      if (command === 'logout') {
+        try {
+          await ElMessageBox.confirm(
+            '确定要退出登录吗？',
+            '确认退出',
+            {
+              confirmButtonText: '确定',
+              cancelButtonText: '取消',
+              type: 'warning'
+            }
+          )
+          
+          // 清除认证信息
+          authStore.clearAuth()
+          ElMessage.success('退出登录成功')
+          
+          // 跳转到登录页
+          router.push('/login')
+        } catch (error) {
+          // 用户取消操作
+        }
+      }
+    }
+    
     return {
-      appTitle
+      appTitle,
+      isLoginPage,
+      authStore,
+      handleUserCommand
     }
   }
 }
@@ -147,19 +200,50 @@ export default {
   align-items: center;
 }
 
-.create-btn {
-  background: var(--primary-gradient);
-  border: none;
-  border-radius: var(--radius-md);
-  padding: var(--spacing-sm) var(--spacing-md);
-  font-weight: 600;
-  box-shadow: var(--shadow-sm);
-  transition: all 0.2s ease;
+/* 顶部导航用户信息 */
+.user-section {
+  flex-shrink: 0;
 }
 
-.create-btn:hover {
+.user-info {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-sm);
+  padding: var(--spacing-xs) var(--spacing-sm);
+  border-radius: var(--radius-md);
+  cursor: pointer;
+  transition: all 0.2s ease;
+  background: rgba(99, 102, 241, 0.1);
+  border: 1px solid rgba(99, 102, 241, 0.2);
+}
+
+.user-info:hover {
+  background: rgba(99, 102, 241, 0.2);
+  border-color: var(--primary-color);
   transform: translateY(-1px);
-  box-shadow: var(--shadow-md);
+}
+
+.user-avatar {
+  background: var(--primary-gradient);
+  color: white;
+  flex-shrink: 0;
+}
+
+.username {
+  font-size: 14px;
+  font-weight: 500;
+  color: var(--text-primary);
+  white-space: nowrap;
+}
+
+.dropdown-icon {
+  font-size: 12px;
+  color: var(--text-secondary);
+  transition: transform 0.2s ease;
+}
+
+.user-info:hover .dropdown-icon {
+  transform: rotate(180deg);
 }
 
 /* 主要内容区域 */
@@ -168,10 +252,20 @@ export default {
   padding: var(--spacing-xl) 0;
 }
 
+.main-content.login-layout {
+  padding: 0;
+  min-height: 100vh;
+}
+
 .content-container {
   max-width: 1400px;
   margin: 0 auto;
   padding: 0 var(--spacing-lg);
+}
+
+.content-container.login-container {
+  max-width: none;
+  padding: 0;
 }
 
 /* 响应式设计 */

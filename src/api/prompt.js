@@ -1,71 +1,51 @@
-import request from '@/utils/request'
+import api from '@/api/request'
 
 export const promptApi = {
   // 获取prompt列表
-  getPrompts(params = {}) {
-    return request({
-      url: '/prompts',
-      method: 'get',
-      params
-    })
+  async getPrompts(params = {}) {
+    const response = await api.get('/prompts', { params })
+    return response.data
   },
 
   // 获取单个prompt详情
-  getPrompt(id) {
-    return request({
-      url: `/prompts/${id}`,
-      method: 'get'
-    })
+  async getPrompt(id) {
+    const response = await api.get(`/prompts/${id}`)
+    return response.data
   },
 
   // 创建prompt
-  createPrompt(data) {
-    return request({
-      url: '/prompts',
-      method: 'post',
-      data
-    })
+  async createPrompt(data) {
+    const response = await api.post('/prompts', data)
+    return response.data
   },
 
   // 更新prompt
-  updatePrompt(id, data) {
-    return request({
-      url: `/prompts/${id}`,
-      method: 'put',
-      data
-    })
+  async updatePrompt(id, data) {
+    const response = await api.put(`/admin/api/prompts/${id}`, data)
+    return response.data
   },
 
   // 删除prompt
-  deletePrompt(id) {
-    return request({
-      url: `/prompts/${id}`,
-      method: 'delete'
-    })
+  async deletePrompt(id) {
+    const response = await api.delete(`/prompts/${id}`)
+    return response.data
   },
 
   // 发布prompt（版本号+1）
-  publishPrompt(id) {
-    return request({
-      url: `/prompts/${id}/publish`,
-      method: 'post'
-    })
+  async publishPrompt(id) {
+    const response = await api.post(`/prompts/${id}/publish`)
+    return response.data
   },
 
   // 获取prompt历史版本
-  getPromptHistory(id, params = {}) {
-    return request({
-      url: `/prompts/${id}/history`,
-      method: 'get',
-      params
-    })
+  async getPromptHistory(id, params = {}) {
+    const response = await api.get(`/prompts/${id}/history`, { params })
+    return response.data
   },
 
   // 获取特定版本的prompt
-  getPromptVersion(id, version) {
-    return request({
-      url: `/prompts/${id}/versions/${version}`,
-      method: 'get'
-    })
+  async getPromptVersion(id, version) {
+    const response = await api.get(`/prompts/${id}/versions/${version}`)
+    return response.data
   }
 }

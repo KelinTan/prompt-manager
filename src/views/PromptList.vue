@@ -1,26 +1,42 @@
 <template>
   <div class="prompt-list">
-    <!-- 页面头部和搜索 -->
+    <!-- 优化后的页面头部 -->
     <div class="page-header">
-      <div class="header-content">
+      <div class="header-container">
+        <!-- 左侧标题区域 -->
         <div class="header-left">
-          <h1 class="page-title">Prompt 管理</h1>
-          <p class="page-subtitle">管理和组织你的 AI Prompt 模板</p>
+          <div class="title-section">
+            <h1 class="page-title">Prompt 管理</h1>
+            <p class="page-subtitle">管理和组织你的 AI Prompt 模板</p>
+          </div>
         </div>
-        <div class="header-right">
-          <div class="search-input-wrapper">
+        
+        <!-- 中间搜索区域 -->
+        <div class="header-center">
+          <div class="search-container">
             <el-input 
               v-model="searchForm.title" 
-              placeholder="搜索..."
+              placeholder="搜索 Prompt..."
               class="search-input"
+              size="large"
               clearable
               @clear="handleSearch"
               @keyup.enter="handleSearch"
             >
               <template #prefix>
-                <el-icon><Search /></el-icon>
+                <el-icon class="search-icon"><Search /></el-icon>
               </template>
             </el-input>
+          </div>
+        </div>
+        
+        <!-- 右侧操作区域 -->
+        <div class="header-right">
+          <div class="action-section">
+            <el-button type="primary" size="large" class="create-btn" @click="$router.push('/prompts/create')">
+              <el-icon><Plus /></el-icon>
+              新建 Prompt
+            </el-button>
           </div>
         </div>
       </div>
@@ -298,6 +314,8 @@ export default {
       }
     }
 
+
+
     onMounted(() => {
       loadData()
     })
@@ -331,121 +349,136 @@ export default {
   width: 100%;
 }
 
-/* 页面头部 */
+/* 优化后的页面头部 */
 .page-header {
   margin-bottom: var(--spacing-xl);
+  background: var(--bg-primary);
+  border-radius: var(--radius-xl);
+  box-shadow: var(--shadow-sm);
+  border: 1px solid var(--border-color);
 }
 
-.header-content {
-  display: flex;
-  justify-content: center;
+.header-container {
+  display: grid;
+  grid-template-columns: 1fr 2fr 1fr;
   align-items: center;
-  max-width: 1400px;
-  margin: 0 auto;
-  padding: 0 var(--spacing-lg);
-  position: relative;
+  gap: var(--spacing-lg);
+  padding: var(--spacing-lg) var(--spacing-xl);
 }
 
+/* 左侧标题区域 */
 .header-left {
-  position: absolute;
-  left: var(--spacing-lg);
-}
-
-.header-right {
   display: flex;
   align-items: center;
 }
 
-.header-left {
+.title-section {
   flex: 1;
 }
 
 .page-title {
-  font-size: 32px;
+  font-size: 28px;
   font-weight: 800;
   color: var(--text-primary);
-  margin: 0 0 var(--spacing-xs);
+  margin: 0 0 4px;
   letter-spacing: -0.025em;
 }
 
 .page-subtitle {
-  font-size: 16px;
+  font-size: 14px;
   color: var(--text-secondary);
   margin: 0;
-  line-height: 1.5;
+  line-height: 1.4;
+}
+
+/* 中间搜索区域 */
+.header-center {
+  display: flex;
+  justify-content: center;
+}
+
+.search-container {
+  width: 100%;
+  max-width: 400px;
+}
+
+/* 右侧操作区域 */
+.header-right {
+  display: flex;
+  justify-content: flex-end;
+}
+
+.action-section {
+  display: flex;
+  align-items: center;
+}
+
+.create-btn {
+  background: var(--primary-gradient);
+  border: none;
+  border-radius: var(--radius-lg);
+  padding: var(--spacing-sm) var(--spacing-lg);
+  font-weight: 600;
+  box-shadow: var(--shadow-sm);
+  transition: all 0.2s ease;
+  font-size: 15px;
+}
+
+.create-btn:hover {
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-lg);
+}
+
+.create-btn:active {
+  transform: translateY(0);
 }
 
 
 
-/* 搜索和过滤区域 */
-.search-input-wrapper {
-  width: 300px;
-}
 
+
+/* 搜索区域优化 */
 :deep(.search-input .el-input__wrapper) {
   border-radius: var(--radius-xl);
-  box-shadow: none;
-  border: 1px solid var(--border-color);
-  background: var(--bg-primary);
-  padding: var(--spacing-sm) var(--spacing-md);
+  border: 2px solid var(--border-color);
+  background: var(--bg-secondary);
+  padding: 0 var(--spacing-md);
+  height: 48px;
+  transition: all 0.2s ease;
+  box-shadow: var(--shadow-sm);
 }
 
 :deep(.search-input .el-input__wrapper:hover) {
   border-color: var(--primary-color);
+  background: var(--bg-primary);
+  box-shadow: var(--shadow-md);
 }
 
 :deep(.search-input .el-input__wrapper.is-focus) {
   border-color: var(--primary-color);
-  box-shadow: 0 0 0 2px rgba(99, 102, 241, 0.1);
-}
-
-:deep(.search-input .el-input__inner) {
-  border: none !important;
-  background: transparent !important;
-  box-shadow: none !important;
-  border-radius: 0 !important;
-  outline: none !important;
-}
-
-:deep(.search-input .el-input__inner:focus) {
-  border: none !important;
-  box-shadow: none !important;
-  outline: none !important;
-}
-
-/* 确保移除所有可能的内层样式 */
-:deep(.search-input input) {
-  border: none !important;
-  background: transparent !important;
-  box-shadow: none !important;
-  border-radius: 0 !important;
-  outline: none !important;
-}
-
-:deep(.search-input input:focus) {
-  border: none !important;
-  box-shadow: none !important;
-  outline: none !important;
-}
-
-:deep(.search-input .el-input) {
-  border: none !important;
-  box-shadow: none !important;
-}
-
-:deep(.search-input .el-input__inner) {
-  border-radius: var(--radius-lg);
-  border: 1px solid var(--border-color);
-  background: var(--bg-secondary);
-  padding-left: 2.5rem;
-  height: 44px;
-  font-size: 16px;
-  transition: all 0.2s ease;
-}
-
-:deep(.search-input .el-input__inner:focus) {
-  border-color: var(--primary-color);
+  background: var(--bg-primary);
   box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.1);
+  transform: translateY(-1px);
+}
+
+:deep(.search-input .el-input__inner) {
+  border: none;
+  background: transparent;
+  box-shadow: none;
+  font-size: 16px;
+  color: var(--text-primary);
+  height: 100%;
+  line-height: 1.5;
+}
+
+:deep(.search-input .el-input__inner::placeholder) {
+  color: var(--text-muted);
+  font-size: 15px;
+}
+
+.search-icon {
+  color: var(--text-secondary);
+  font-size: 18px;
 }
 
 
@@ -736,33 +769,66 @@ export default {
   }
 }
 
-@media (max-width: 768px) {
-  .header-content {
-    flex-direction: column;
-    justify-content: flex-start;
-    align-items: flex-start;
+/* 响应式设计 */
+@media (max-width: 1024px) {
+  .header-container {
+    grid-template-columns: 1fr;
     gap: var(--spacing-md);
-    position: static;
+    text-align: center;
   }
   
-  .header-left {
-    position: static;
+  .header-center {
+    order: -1;
   }
   
+  .search-container {
+    max-width: 500px;
+  }
+  
+  .header-left,
   .header-right {
-    width: 100%;
     justify-content: center;
   }
   
-  .search-input-wrapper {
-    width: 100%;
-    max-width: 400px;
+  .title-section {
+    text-align: center;
+  }
+}
+
+@media (max-width: 768px) {
+  .header-container {
+    padding: var(--spacing-md) var(--spacing-lg);
+  }
+  
+  .page-title {
+    font-size: 24px;
+  }
+  
+  .page-subtitle {
+    font-size: 13px;
+  }
+  
+  .create-btn {
+    padding: var(--spacing-sm) var(--spacing-md);
+    font-size: 14px;
+  }
+  
+  :deep(.search-input .el-input__wrapper) {
+    height: 44px;
   }
 }
 
 @media (max-width: 480px) {
+  .header-container {
+    padding: var(--spacing-sm) var(--spacing-md);
+  }
+  
   .page-title {
-    font-size: 24px;
+    font-size: 20px;
+  }
+  
+  .page-subtitle {
+    font-size: 12px;
   }
   
   .prompt-card {
@@ -773,8 +839,8 @@ export default {
     font-size: 16px;
   }
   
-  .header-content {
-    padding: 0 var(--spacing-md);
+  .create-btn span {
+    display: none;
   }
 }
 </style>
