@@ -6,12 +6,12 @@ export class Prompt {
     this.title = data.title || ''
     this.type = data.type || 'text'
     this.model = data.model || ''
-    this.return_type = data.return_type || ''
+    this.return_type = data.return_type || 'json_object'
     this.template = data.template || ''
     this.mock = data.mock !== undefined ? data.mock : false
     this.mock_data = data.mock_data || ''
     this.remark = data.remark || ''
-    this.format_type = data.format_type || 'braces'
+    this.format_type = data.format_type || 'none'
     this.ai_provider = data.ai_provider || 'openai'
     this.created_at = data.created_at || null
     this.updated_at = data.updated_at || null
@@ -49,7 +49,7 @@ export class Prompt {
 export const FORMAT_TYPE_OPTIONS = [
   { label: '方括号 []', value: 'square_brackets' },
   { label: '花括号 {}', value: 'braces' },
-  { label: '无格式', value: 'none' }
+  { label: '无', value: 'none' }
 ]
 
 // AI提供商选项

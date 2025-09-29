@@ -78,26 +78,10 @@
             </el-form-item>
           </el-col>
           <el-col :span="12">
-            <!-- 占位列 -->
-          </el-col>
-        </el-row>
-
-        <el-row :gutter="20">
-          <el-col :span="12">
-            <el-form-item label="模型" prop="model">
-              <el-input 
-                v-model="form.model" 
-                placeholder="请输入模型名称"
-                maxlength="255"
-                show-word-limit
-              />
-            </el-form-item>
-          </el-col>
-          <el-col :span="12">
-            <el-form-item label="返回类型" prop="return_type">
+            <el-form-item label="返回值" prop="return_type">
               <el-select 
                 v-model="form.return_type" 
-                placeholder="请选择返回类型"
+                placeholder="请选择返回值"
                 style="width: 100%"
               >
                 <el-option 
@@ -113,6 +97,34 @@
 
         <el-row :gutter="20">
           <el-col :span="12">
+            <el-form-item label="模版参数格式" prop="format_type">
+              <el-select 
+                v-model="form.format_type" 
+                placeholder="请选择模版参数格式"
+                style="width: 100%"
+              >
+                <el-option 
+                  v-for="option in formatTypeOptions" 
+                  :key="option.value" 
+                  :label="option.label" 
+                  :value="option.value"
+                />
+              </el-select>
+            </el-form-item>
+          </el-col>
+          <el-col :span="12">
+            <el-form-item label="启用Mock">
+              <el-switch 
+                v-model="form.mock"
+                active-text="启用"
+                inactive-text="禁用"
+              />
+            </el-form-item>
+          </el-col>
+        </el-row>
+
+        <el-row :gutter="20">
+           <el-col :span="12">
             <el-form-item label="AI提供商" prop="ai_provider">
               <el-select 
                 v-model="form.ai_provider" 
@@ -129,23 +141,16 @@
             </el-form-item>
           </el-col>
           <el-col :span="12">
-            <el-form-item label="格式化类型" prop="format_type">
-              <el-select 
-                v-model="form.format_type" 
-                placeholder="请选择格式化类型"
-                style="width: 100%"
-              >
-                <el-option 
-                  v-for="option in formatTypeOptions" 
-                  :key="option.value" 
-                  :label="option.label" 
-                  :value="option.value"
-                />
-              </el-select>
+            <el-form-item label="模型" prop="model">
+              <el-input 
+                v-model="form.model" 
+                placeholder="请输入模型名称"
+                maxlength="255"
+                show-word-limit
+              />
             </el-form-item>
           </el-col>
         </el-row>
-
         <el-form-item label="模板" prop="template">
           <el-input 
             v-model="form.template" 
@@ -159,17 +164,7 @@
 
 
 
-        <el-row :gutter="20">
-          <el-col :span="12">
-            <el-form-item label="启用Mock">
-              <el-switch 
-                v-model="form.mock"
-                active-text="启用"
-                inactive-text="禁用"
-              />
-            </el-form-item>
-          </el-col>
-        </el-row>
+        <!-- (启用Mock 已在上面的 行中与 格式化类型 配对) -->
 
         <el-form-item v-if="form.mock" label="Mock数据">
           <el-input 
@@ -307,8 +302,8 @@ export default {
       mockDataError.value = ''
 
       if (!form.mock) return
-      // only validate when return_type is json
-      if (form.return_type !== 'json_object') return
+  // only validate when return_type is json_object
+  if (form.return_type !== 'json_object') return
 
       const text = (form.mock_data || '').toString()
       if (!text.trim()) {
@@ -328,7 +323,7 @@ export default {
       try {
         await formRef.value.validate()
         
-        // 验证Mock数据（仅在 return_type === 'json' 时校验）
+        // 验证Mock数据（仅在 return_type === 'json_object' 时校验）
         if (form.mock && form.return_type === 'json_object') {
           validateMockData()
           if (mockDataError.value) return
@@ -399,8 +394,8 @@ export default {
         // 先验证表单
         await formRef.value.validate()
         
-        // 验证Mock数据（仅在 return_type === 'json' 时校验）
-        if (form.mock && form.return_type === 'json') {
+        // 验证Mock数据（仅在 return_type === 'json_object' 时校验）
+        if (form.mock && form.return_type === 'json_object') {
           validateMockData()
           if (mockDataError.value) return
         }

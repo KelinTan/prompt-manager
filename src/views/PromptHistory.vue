@@ -101,7 +101,7 @@
                       <span>{{ version.ai_provider || '-' }}</span>
                     </el-col>
                     <el-col :span="6">
-                      <span class="meta-label">格式:</span>
+                      <span class="meta-label">模版参数格式:</span>
                       <span>{{ getFormatTypeLabel(version.format_type) }}</span>
                     </el-col>
                   </el-row>
