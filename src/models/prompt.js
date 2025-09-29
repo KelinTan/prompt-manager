@@ -4,15 +4,15 @@ export class Prompt {
     this.id = data.id || null
     this.name = data.name || ''
     this.title = data.title || ''
-    this.type = data.type || ''
+    this.type = data.type || 'text'
     this.model = data.model || ''
     this.return_type = data.return_type || ''
     this.template = data.template || ''
-    this.mock = data.mock !== undefined ? data.mock : true
-    this.mock_data = data.mock_data || {}
+    this.mock = data.mock !== undefined ? data.mock : false
+    this.mock_data = data.mock_data || ''
     this.remark = data.remark || ''
     this.format_type = data.format_type || 'braces'
-    this.ai_provider = data.ai_provider || ''
+    this.ai_provider = data.ai_provider || 'openai'
     this.created_at = data.created_at || null
     this.updated_at = data.updated_at || null
     this.version = data.version || 1

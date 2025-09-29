@@ -49,10 +49,10 @@
             </el-form-item>
           </el-col>
           <el-col :span="12">
-            <el-form-item label="唯一标识" prop="name">
+            <el-form-item label="业务标识" prop="name">
               <el-input 
                 v-model="form.name" 
-                placeholder="请输入唯一标识（如：user_profile_prompt）"
+                placeholder="请输入业务标识（如：user_profile_prompt）"
                 maxlength="255"
                 show-word-limit
               />
