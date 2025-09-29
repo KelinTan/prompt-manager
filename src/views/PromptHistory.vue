@@ -1,15 +1,20 @@
 <template>
   <div class="prompt-history">
     <div class="page-header">
-      <h2>{{ promptName }} - 历史版本</h2>
-      <el-button @click="handleBack">返回列表</el-button>
+      <div class="header-content">
+        <div class="title-section">
+          <h2>{{ promptName }} - 历史版本</h2>
+          <p class="version-note">显示最近 10 个版本记录</p>
+        </div>
+        <el-button @click="handleBack">返回列表</el-button>
+      </div>
     </div>
 
     <el-card shadow="never">
       <div class="history-info">
         <el-descriptions :column="4" border>
           <el-descriptions-item label="当前版本">{{ currentVersion }}</el-descriptions-item>
-          <el-descriptions-item label="总版本数">{{ historyList.length }}</el-descriptions-item>
+          <el-descriptions-item label="显示版本数">{{ historyList.length }} / 最近10个</el-descriptions-item>
           <el-descriptions-item label="创建时间">{{ formatDate(createdAt) }}</el-descriptions-item>
           <el-descriptions-item label="最后更新">{{ formatDate(updatedAt) }}</el-descriptions-item>
         </el-descriptions>
@@ -241,8 +246,8 @@ export default {
         updatedAt.value = currentPrompt.updated_at
         currentVersionData.value = currentPrompt
 
-        // 获取历史版本
-        const historyResponse = await promptApi.getPromptHistory(promptId)
+        // 获取历史版本（最近10个版本）
+        const historyResponse = await promptApi.getPromptHistory(promptId, { size: 10 })
         historyList.value = historyResponse.items || []
         
         // 按版本号降序排序
@@ -315,15 +320,31 @@ export default {
 }
 
 .page-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
   margin-bottom: 20px;
 }
 
+.header-content {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.title-section {
+  flex: 1;
+}
+
 .page-header h2 {
-  margin: 0;
+  margin: 0 0 4px 0;
   color: #303133;
+  font-size: 24px;
+  font-weight: 700;
+}
+
+.version-note {
+  margin: 0;
+  color: #909399;
+  font-size: 14px;
+  font-style: italic;
 }
 
 .history-info {
