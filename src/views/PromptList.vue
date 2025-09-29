@@ -299,35 +299,33 @@ export default {
 
     // 发布
     const handlePublish = async (row) => {
-      ElMessage.info('发布功能暂未开发，敬请期待')
-      // try {
-      //   await ElMessageBox.confirm(
-      //     `确定要发布Prompt "${row.title || row.name}" 吗？发布后版本号将+1。`,
-      //     '确认发布',
-      //     {
-      //       confirmButtonText: '确定',
-      //       cancelButtonText: '取消',
-      //       type: 'warning'
-      //     }
-      //   )
+      try {
+        await ElMessageBox.confirm(
+          `确定要发布Prompt "${row.title || row.name}" 吗？发布后版本号将+1。`,
+          '确认发布',
+          {
+            confirmButtonText: '确定',
+            cancelButtonText: '取消',
+            type: 'warning'
+          }
+        )
 
-      //   publishingIds.value.add(row.id)
-      //   await promptApi.publishPrompt(row.id)
-      //   ElMessage.success('发布成功')
-      //   loadData() // 重新加载数据
-      // } catch (error) {
-      //   if (error !== 'cancel') {
-      //     ElMessage.error('发布失败: ' + error.message)
-      //   }
-      // } finally {
-      //   publishingIds.value.delete(row.id)
-      // }
+        publishingIds.value.add(row.id)
+        await promptApi.publishPrompt(row.id)
+        ElMessage.success('发布成功')
+        loadData() // 重新加载数据
+      } catch (error) {
+        if (error !== 'cancel') {
+          ElMessage.error('发布失败: ' + error.message)
+        }
+      } finally {
+        publishingIds.value.delete(row.id)
+      }
     }
 
     // 查看历史
     const handleHistory = (row) => {
-      ElMessage.info('历史版本功能暂未开发，敬请期待')
-      // router.push(`/prompts/${row.id}/history`)
+      router.push(`/prompts/${row.id}/history`)
     }
 
     // 删除

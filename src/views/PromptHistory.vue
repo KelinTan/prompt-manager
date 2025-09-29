@@ -257,7 +257,7 @@ export default {
     // 查看版本详情
     const handleViewVersion = async (version) => {
       try {
-        const versionData = await promptApi.getPromptVersion(promptId, version.version)
+        const versionData = await promptApi.getPrompt(version.id)
         selectedVersion.value = versionData
         versionDialogVisible.value = true
       } catch (error) {
@@ -268,7 +268,7 @@ export default {
     // 对比版本
     const handleCompareVersion = async (version) => {
       try {
-        const versionData = await promptApi.getPromptVersion(promptId, version.version)
+        const versionData = await promptApi.getPrompt(version.id)
         compareVersion.value = versionData
         compareDialogVisible.value = true
       } catch (error) {

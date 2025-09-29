@@ -11,15 +11,14 @@
         >
           保存
         </el-button>
-        <!-- 发布功能暂未开发，暂时隐藏 -->
-        <!-- <el-button 
+        <el-button 
           v-if="isEdit"
           type="success" 
           @click="handlePublish"
           :loading="publishing"
         >
           发布
-        </el-button> -->
+        </el-button>
       </div>
     </div>
 
@@ -269,7 +268,6 @@ export default {
         Object.assign(form, new Prompt(data))
         
 
-
         // 处理Mock数据
         if (form.mock_data) {
           mockDataString.value = typeof form.mock_data === 'string' 
@@ -337,31 +335,30 @@ export default {
 
     // 发布
     const handlePublish = async () => {
-      ElMessage.info('发布功能暂未开发，敬请期待')
-      // try {
-      //   await ElMessageBox.confirm(
-      //     `确定要发布Prompt "${form.title || form.name}" 吗？发布后版本号将+1。`,
-      //     '确认发布',
-      //     {
-      //       confirmButtonText: '确定',
-      //       cancelButtonText: '取消',
-      //       type: 'warning'
-      //     }
-      //   )
+      try {
+        await ElMessageBox.confirm(
+          `确定要发布Prompt "${form.title || form.name}" 吗？发布后版本号将+1。`,
+          '确认发布',
+          {
+            confirmButtonText: '确定',
+            cancelButtonText: '取消',
+            type: 'warning'
+          }
+        )
 
-      //   publishing.value = true
-      //   await promptApi.publishPrompt(promptId.value)
-      //   ElMessage.success('发布成功')
+        publishing.value = true
+        await promptApi.publishPrompt(promptId.value)
+        ElMessage.success('发布成功')
         
-      //   // 重新加载数据
-      //   await loadData()
-      // } catch (error) {
-      //   if (error !== 'cancel') {
-      //     ElMessage.error('发布失败: ' + error.message)
-      //   }
-      // } finally {
-      //   publishing.value = false
-      // }
+        // 发布完成后跳转回首页，避免二次发布
+        router.push('/prompts')
+      } catch (error) {
+        if (error !== 'cancel') {
+          ElMessage.error('发布失败: ' + error.message)
+        }
+      } finally {
+        publishing.value = false
+      }
     }
 
     // 返回
