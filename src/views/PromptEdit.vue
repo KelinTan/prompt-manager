@@ -12,6 +12,13 @@
           保存
         </el-button>
         <el-button 
+          type="warning" 
+          @click="handleSaveAndPublish"
+          :loading="saving || publishing"
+        >
+          保存并发布
+        </el-button>
+        <el-button 
           v-if="isEdit"
           type="success" 
           @click="handlePublish"
@@ -361,6 +368,60 @@ export default {
       }
     }
 
+    // 保存并发布
+    const handleSaveAndPublish = async () => {
+      try {
+        await ElMessageBox.confirm(
+          `确定要保存并发布Prompt "${form.title || form.name}" 吗？保存后将立即发布，版本号将+1。`,
+          '确认保存并发布',
+          {
+            confirmButtonText: '确定',
+            cancelButtonText: '取消',
+            type: 'warning'
+          }
+        )
+
+        // 先验证表单
+        await formRef.value.validate()
+        
+        // 验证Mock数据
+        if (form.mock && mockDataString.value.trim()) {
+          validateMockData()
+          if (mockDataError.value) {
+            return
+          }
+        }
+
+        saving.value = true
+        publishing.value = true
+        
+        const submitData = { ...form }
+
+        // 先保存
+        if (isEdit.value) {
+          await promptApi.updatePrompt(promptId.value, submitData)
+        } else {
+          await promptApi.createPrompt(submitData)
+        }
+
+        // 保存成功后发布
+        await promptApi.publishPrompt(promptId.value)
+        ElMessage.success('保存并发布成功')
+        
+        // 跳转回首页
+        router.push('/prompts')
+      } catch (error) {
+        if (error !== 'cancel') {
+          if (error.message) {
+            ElMessage.error('保存并发布失败: ' + error.message)
+          }
+        }
+      } finally {
+        saving.value = false
+        publishing.value = false
+      }
+    }
+
     // 返回
     const handleBack = () => {
       router.push('/prompts')
@@ -387,6 +448,7 @@ export default {
       validateMockData,
       handleSave,
       handlePublish,
+      handleSaveAndPublish,
       handleBack
     }
   }
