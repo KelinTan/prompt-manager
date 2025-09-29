@@ -254,11 +254,11 @@ export default {
 
     // 获取版本描述
     const getVersionLabel = (prompt) => {
-      if (!prompt.version) return '未知版本'
+      if (!prompt.version) return '初始版本'
       if (prompt.status === 'published') {
-        return `v${prompt.version}`
+        return `第${prompt.version}版`
       } else {
-        return `v${prompt.version} (草稿)`
+        return `第${prompt.version}版·草稿`
       }
     }
 

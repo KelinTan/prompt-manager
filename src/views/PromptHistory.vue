@@ -27,16 +27,16 @@
             v-for="version in historyList"
             :key="version.version"
             :timestamp="formatDate(version.created_at)"
-            :type="version.version === currentVersion ? 'primary' : 'info'"
+            :type="version.is_latest ? 'primary' : 'info'"
             placement="top"
           >
-            <el-card class="version-card" :class="{ 'current-version': version.version === currentVersion }">
+            <el-card class="version-card" :class="{ 'current-version': version.is_latest }">
               <div class="version-header">
                 <div class="version-info">
                   <h4>版本 {{ version.version }}</h4>
                   <div class="version-tags">
                     <el-tag 
-                      v-if="version.version === currentVersion" 
+                      v-if="version.is_latest" 
                       type="success" 
                       size="small"
                     >
@@ -59,12 +59,21 @@
                     查看详情
                   </el-button>
                   <el-button 
-                    v-if="version.version !== currentVersion"
+                    v-if="!version.is_latest"
                     size="small" 
                     type="warning"
                     @click="handleCompareVersion(version)"
                   >
                     与当前版本对比
+                  </el-button>
+                  <el-button 
+                    v-if="!version.is_latest"
+                    size="small" 
+                    type="danger"
+                    @click="handleRollback(version)"
+                    :loading="rollbackingIds.has(version.id)"
+                  >
+                    回滚到此版本
                   </el-button>
                 </div>
               </div>
@@ -208,7 +217,7 @@
 <script>
 import { ref, reactive, onMounted } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
-import { ElMessage } from 'element-plus'
+import { ElMessage, ElMessageBox } from 'element-plus'
 import { promptApi } from '@/api/prompt'
 import { FORMAT_TYPE_OPTIONS, PROMPT_STATUS_OPTIONS } from '@/models/prompt'
 
@@ -230,6 +239,8 @@ export default {
     const selectedVersion = ref(null)
     const compareVersion = ref(null)
     const currentVersionData = ref(null)
+    const rollbackingIds = ref(new Set())
+    const currentPromptId = ref(null)
 
     const promptId = route.params.id
 
@@ -265,6 +276,9 @@ export default {
     const loadHistory = async () => {
       loading.value = true
       try {
+        // 清空之前的数据
+        historyList.value = []
+        
         // 获取当前prompt信息
         const currentPrompt = await promptApi.getPrompt(promptId)
         promptName.value = currentPrompt.title || currentPrompt.name
@@ -272,13 +286,23 @@ export default {
         createdAt.value = currentPrompt.created_at
         updatedAt.value = currentPrompt.updated_at
         currentVersionData.value = currentPrompt
+        currentPromptId.value = currentPrompt.id
 
         // 获取历史版本（最近10个版本）
         const historyResponse = await promptApi.getPromptHistory(promptId, { size: 10 })
         historyList.value = historyResponse.items || []
         
-        // 按版本号降序排序
-        // historyList.value.sort((a, b) => b.version - a.version)
+        // 按版本号降序排序，确保最新版本显示在前面
+        historyList.value.sort((a, b) => b.version - a.version)
+        
+        // 从历史列表中找到当前版本（is_latest = true）
+        if (historyList.value.length > 0) {
+          const latestVersion = historyList.value.find(v => v.is_latest) || historyList.value[0]
+          currentVersion.value = latestVersion.version
+          currentPromptId.value = latestVersion.id
+          // 更新当前版本的详细信息
+          currentVersionData.value = latestVersion
+        }
       } catch (error) {
         ElMessage.error('加载历史数据失败: ' + error.message)
       } finally {
@@ -308,6 +332,39 @@ export default {
       }
     }
 
+    // 回滚版本
+    const handleRollback = async (version) => {
+      try {
+        await ElMessageBox.confirm(
+          `确定要回滚到版本 ${version.version} 吗？这将会创建一个新的版本，内容与版本 ${version.version} 相同。`,
+          '确认回滚',
+          {
+            confirmButtonText: '确定回滚',
+            cancelButtonText: '取消',
+            type: 'warning'
+          }
+        )
+
+        rollbackingIds.value.add(version.id)
+        await promptApi.rollbackPrompt(promptId, { 
+          target_version: version.version,
+          target_id: version.id 
+        })
+        ElMessage.success('回滚成功')
+        
+        // 延迟一下确保后端数据已更新，然后重新加载历史数据
+        setTimeout(async () => {
+          await loadHistory()
+        }, 500)
+      } catch (error) {
+        if (error !== 'cancel') {
+          ElMessage.error('回滚失败: ' + error.message)
+        }
+      } finally {
+        rollbackingIds.value.delete(version.id)
+      }
+    }
+
     // 返回
     const handleBack = () => {
       router.push('/prompts')
@@ -329,12 +386,15 @@ export default {
       selectedVersion,
       compareVersion,
       currentVersionData,
+      rollbackingIds,
+      currentPromptId,
       getFormatTypeLabel,
       getStatusInfo,
       formatDate,
       formatMockData,
       handleViewVersion,
       handleCompareVersion,
+      handleRollback,
       handleBack
     }
   }
@@ -423,7 +483,12 @@ export default {
 
 .version-actions {
   display: flex;
-  gap: 10px;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.version-actions .el-button {
+  font-size: 12px;
 }
 
 .version-content {

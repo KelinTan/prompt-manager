@@ -47,5 +47,11 @@ export const promptApi = {
   async getPromptVersion(id, version) {
     const response = await api.get(`/prompts/${id}/versions/${version}`)
     return response.data
+  },
+
+  // 回滚到指定版本
+  async rollbackPrompt(id, data) {
+    const response = await api.post(`/prompts/${id}/rollback`, data)
+    return response.data
   }
 }
