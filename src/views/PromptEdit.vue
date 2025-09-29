@@ -173,10 +173,10 @@
 
         <el-form-item v-if="form.mock" label="Mock数据">
           <el-input 
-            v-model="mockDataString" 
+            v-model="mockDataText" 
             type="textarea" 
             :rows="4"
-            placeholder="请输入Mock数据 (JSON格式)"
+            placeholder="请输入Mock数据"
             @blur="validateMockData"
           />
           <div v-if="mockDataError" class="error-text">
@@ -215,7 +215,7 @@ export default {
     const saving = ref(false)
     const publishing = ref(false)
     const loading = ref(false)
-    const mockDataError = ref('')
+  const mockDataError = ref('')
 
     // 是否为编辑模式
     const isEdit = computed(() => !!route.params.id)
@@ -224,8 +224,19 @@ export default {
     // 表单数据
     const form = reactive(new Prompt())
 
-    // Mock数据字符串（用于界面显示和编辑）
-    const mockDataString = ref('')
+    // Mock数据文本（直接绑定到 form.mock_data）
+    const mockDataText = computed({
+      get() {
+        if (form.mock_data === null || form.mock_data === undefined) return ''
+        return typeof form.mock_data === 'string'
+          ? form.mock_data
+          : JSON.stringify(form.mock_data, null, 2)
+      },
+      set(val) {
+        // always store as string (user requested mock_data is a string)
+        form.mock_data = val
+      }
+    })
 
     // 选项数据
     const aiProviderOptions = AI_PROVIDER_OPTIONS
@@ -275,11 +286,11 @@ export default {
         Object.assign(form, new Prompt(data))
         
 
-        // 处理Mock数据
-        if (form.mock_data) {
-          mockDataString.value = typeof form.mock_data === 'string' 
-            ? form.mock_data 
-            : JSON.stringify(form.mock_data, null, 2)
+        // 处理Mock数据：确保 form.mock_data 是字符串或空字符串
+        if (form.mock_data === null || form.mock_data === undefined) {
+          form.mock_data = ''
+        } else if (typeof form.mock_data !== 'string') {
+          form.mock_data = JSON.stringify(form.mock_data, null, 2)
         }
       } catch (error) {
         ElMessage.error('加载数据失败: ' + error.message)
@@ -291,16 +302,22 @@ export default {
 
 
 
-    // 验证Mock数据
+    // 验证Mock数据（仅在返回类型为 json 时进行校验）
     const validateMockData = () => {
       mockDataError.value = ''
-      if (!mockDataString.value.trim()) {
-        form.mock_data = {}
+
+      if (!form.mock) return
+      // only validate when return_type is json
+      if (form.return_type !== 'json_object') return
+
+      const text = (form.mock_data || '').toString()
+      if (!text.trim()) {
+        // empty is allowed
         return
       }
 
       try {
-        form.mock_data = JSON.parse(mockDataString.value)
+        JSON.parse(text)
       } catch (error) {
         mockDataError.value = 'Mock数据格式错误，请输入有效的JSON格式'
       }
@@ -311,12 +328,10 @@ export default {
       try {
         await formRef.value.validate()
         
-        // 验证Mock数据
-        if (form.mock && mockDataString.value.trim()) {
+        // 验证Mock数据（仅在 return_type === 'json' 时校验）
+        if (form.mock && form.return_type === 'json_object') {
           validateMockData()
-          if (mockDataError.value) {
-            return
-          }
+          if (mockDataError.value) return
         }
 
         saving.value = true
@@ -384,12 +399,10 @@ export default {
         // 先验证表单
         await formRef.value.validate()
         
-        // 验证Mock数据
-        if (form.mock && mockDataString.value.trim()) {
+        // 验证Mock数据（仅在 return_type === 'json' 时校验）
+        if (form.mock && form.return_type === 'json') {
           validateMockData()
-          if (mockDataError.value) {
-            return
-          }
+          if (mockDataError.value) return
         }
 
         saving.value = true
@@ -438,8 +451,8 @@ export default {
       publishing,
       loading,
       isEdit,
-      mockDataString,
-      mockDataError,
+  mockDataText,
+  mockDataError,
       aiProviderOptions,
       formatTypeOptions,
       returnTypeOptions,
