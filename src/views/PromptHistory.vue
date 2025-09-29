@@ -34,13 +34,22 @@
               <div class="version-header">
                 <div class="version-info">
                   <h4>版本 {{ version.version }}</h4>
-                  <el-tag 
-                    v-if="version.version === currentVersion" 
-                    type="success" 
-                    size="small"
-                  >
-                    当前版本
-                  </el-tag>
+                  <div class="version-tags">
+                    <el-tag 
+                      v-if="version.version === currentVersion" 
+                      type="success" 
+                      size="small"
+                    >
+                      当前版本
+                    </el-tag>
+                    <el-tag 
+                      :type="getStatusInfo(version.status).type" 
+                      size="small"
+                      class="status-tag"
+                    >
+                      {{ getStatusInfo(version.status).label }}
+                    </el-tag>
+                  </div>
                 </div>
                 <div class="version-actions">
                   <el-button 
@@ -105,6 +114,14 @@
       <div v-if="selectedVersion" class="version-detail">
         <el-descriptions :column="2" border>
           <el-descriptions-item label="版本号">{{ selectedVersion.version }}</el-descriptions-item>
+          <el-descriptions-item label="状态">
+            <el-tag 
+              :type="getStatusInfo(selectedVersion.status).type" 
+              size="small"
+            >
+              {{ getStatusInfo(selectedVersion.status).label }}
+            </el-tag>
+          </el-descriptions-item>
           <el-descriptions-item label="创建时间">{{ formatDate(selectedVersion.created_at) }}</el-descriptions-item>
           <el-descriptions-item label="标题">{{ selectedVersion.title }}</el-descriptions-item>
           <el-descriptions-item label="标识">{{ selectedVersion.name }}</el-descriptions-item>
@@ -193,7 +210,7 @@ import { ref, reactive, onMounted } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { ElMessage } from 'element-plus'
 import { promptApi } from '@/api/prompt'
-import { FORMAT_TYPE_OPTIONS } from '@/models/prompt'
+import { FORMAT_TYPE_OPTIONS, PROMPT_STATUS_OPTIONS } from '@/models/prompt'
 
 export default {
   name: 'PromptHistory',
@@ -220,6 +237,16 @@ export default {
     const getFormatTypeLabel = (value) => {
       const option = FORMAT_TYPE_OPTIONS.find(item => item.value === value)
       return option ? option.label : value
+    }
+
+    // 获取状态信息
+    const getStatusInfo = (status) => {
+      const statusMap = {
+        draft: { label: '草稿', type: 'info', color: '#909399' },
+        published: { label: '已发布', type: 'success', color: '#67c23a' },
+        archived: { label: '已归档', type: 'warning', color: '#e6a23c' }
+      }
+      return statusMap[status] || { label: '草稿', type: 'info', color: '#909399' }
     }
 
     // 格式化日期
@@ -251,7 +278,7 @@ export default {
         historyList.value = historyResponse.items || []
         
         // 按版本号降序排序
-        historyList.value.sort((a, b) => b.version - a.version)
+        // historyList.value.sort((a, b) => b.version - a.version)
       } catch (error) {
         ElMessage.error('加载历史数据失败: ' + error.message)
       } finally {
@@ -303,6 +330,7 @@ export default {
       compareVersion,
       currentVersionData,
       getFormatTypeLabel,
+      getStatusInfo,
       formatDate,
       formatMockData,
       handleViewVersion,
@@ -381,6 +409,16 @@ export default {
 .version-info h4 {
   margin: 0;
   color: #303133;
+}
+
+.version-tags {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.status-tag {
+  font-weight: 500;
 }
 
 .version-actions {

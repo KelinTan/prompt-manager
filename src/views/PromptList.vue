@@ -94,17 +94,31 @@
               <div class="card-subtitle">{{ prompt.name }}</div>
               <div class="card-meta">
                 <span class="prompt-type">{{ prompt.type || '未分类' }}</span>
-                <span class="version-badge">{{ prompt.version ? `v${prompt.version}` : 'latest' }}</span>
+                <span 
+                  class="version-badge"
+                  :class="{ 'draft-version': prompt.status === 'draft', 'published-version': prompt.status === 'published' }"
+                >
+                  {{ getVersionLabel(prompt) }}
+                </span>
               </div>
             </div>
             <div class="card-status">
-              <el-tag 
-                :type="prompt.mock ? 'success' : 'info'" 
-                size="small"
-                class="status-tag"
-              >
-                {{ prompt.mock ? 'Mock' : 'Live' }}
-              </el-tag>
+              <div class="status-tags">
+                <el-tag 
+                  :type="getStatusInfo(prompt.status).type" 
+                  size="small"
+                  class="status-tag"
+                >
+                  {{ getStatusInfo(prompt.status).label }}
+                </el-tag>
+                <el-tag 
+                  :type="prompt.mock ? 'success' : 'warning'" 
+                  size="small"
+                  class="mode-tag"
+                >
+                  {{ prompt.mock ? 'Mock' : 'Live' }}
+                </el-tag>
+              </div>
             </div>
           </div>
           
@@ -197,7 +211,7 @@ import { ref, reactive, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
 import { ElMessage, ElMessageBox } from 'element-plus'
 import { promptApi } from '@/api/prompt'
-import { FORMAT_TYPE_OPTIONS, AI_PROVIDER_OPTIONS } from '@/models/prompt'
+import { FORMAT_TYPE_OPTIONS, AI_PROVIDER_OPTIONS, PROMPT_STATUS_OPTIONS } from '@/models/prompt'
 
 export default {
   name: 'PromptList',
@@ -227,6 +241,25 @@ export default {
     const getFormatTypeLabel = (value) => {
       const option = FORMAT_TYPE_OPTIONS.find(item => item.value === value)
       return option ? option.label : value
+    }
+
+    // 获取状态标签和类型
+    const getStatusInfo = (status) => {
+      const statusMap = {
+        draft: { label: '草稿', type: 'info' },
+        published: { label: '已发布', type: 'success' }
+      }
+      return statusMap[status] || { label: '草稿', type: 'info' }
+    }
+
+    // 获取版本描述
+    const getVersionLabel = (prompt) => {
+      if (!prompt.version) return '未知版本'
+      if (prompt.status === 'published') {
+        return `v${prompt.version}`
+      } else {
+        return `v${prompt.version} (草稿)`
+      }
     }
 
     // 格式化日期
@@ -354,6 +387,8 @@ export default {
       publishingIds,
       aiProviderOptions,
       getFormatTypeLabel,
+      getStatusInfo,
+      getVersionLabel,
       formatDate,
       handleSearch,
       handleReset,
@@ -713,22 +748,47 @@ export default {
 
 .version-badge {
   font-size: 11px;
-  color: var(--primary-color);
-  background: rgba(99, 102, 241, 0.1);
   padding: 2px 6px;
   border-radius: var(--radius-sm);
   font-weight: 600;
   font-family: 'SF Mono', 'Monaco', monospace;
+  border: 1px solid;
+}
+
+.version-badge.draft-version {
+  color: #f59e0b;
+  background: rgba(245, 158, 11, 0.1);
+  border-color: rgba(245, 158, 11, 0.2);
+}
+
+.version-badge.published-version {
+  color: var(--primary-color);
+  background: rgba(99, 102, 241, 0.1);
+  border-color: rgba(99, 102, 241, 0.2);
 }
 
 .card-status {
   flex-shrink: 0;
 }
 
+.status-tags {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-xs);
+  align-items: flex-end;
+}
+
 .status-tag {
   border-radius: var(--radius-sm);
   font-weight: 600;
   font-size: 11px;
+}
+
+.mode-tag {
+  border-radius: var(--radius-sm);
+  font-weight: 500;
+  font-size: 10px;
+  opacity: 0.8;
 }
 
 .card-content {

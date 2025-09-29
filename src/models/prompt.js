@@ -16,6 +16,9 @@ export class Prompt {
     this.created_at = data.created_at || null
     this.updated_at = data.updated_at || null
     this.version = data.version || 1
+    this.status = data.status || 'draft' // draft | published
+    this.is_latest = data.is_latest !== undefined ? data.is_latest : true
+    this.root_id = data.root_id || null
   }
 
   // 获取格式化的创建时间
@@ -66,4 +69,11 @@ export const RETURN_TYPE_OPTIONS = [
 export const PROMPT_TYPE_OPTIONS = [
   { label: 'Text', value: 'text' },
   { label: 'Image', value: 'image' }
+]
+
+// Prompt状态选项
+export const PROMPT_STATUS_OPTIONS = [
+  { label: '草稿', value: 'draft' },
+  { label: '已发布', value: 'published' },
+  { label: '已归档', value: 'archived' }
 ]
