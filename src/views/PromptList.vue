@@ -153,7 +153,18 @@
               >
                 <el-icon><Edit /></el-icon>
               </el-button>
+              <el-tooltip v-if="prompt.status === 'published'" content="当前已发布，无法再次发布" placement="top">
+                <el-button 
+                  size="small" 
+                  type="success"
+                  link
+                  disabled
+                >
+                  <el-icon><Upload /></el-icon>
+                </el-button>
+              </el-tooltip>
               <el-button 
+                v-else
                 size="small" 
                 type="success"
                 link
@@ -332,6 +343,11 @@ export default {
 
     // 发布
     const handlePublish = async (row) => {
+      // 如果已经是已发布状态，不允许再次发布
+      if (row.status === 'published') {
+        ElMessage.info('该 Prompt 已是已发布状态，无法重复发布')
+        return
+      }
       try {
         await ElMessageBox.confirm(
           `确定要发布Prompt "${row.title || row.name}" 吗？发布后版本号将+1。`,
