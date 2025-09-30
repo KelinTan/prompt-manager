@@ -151,16 +151,26 @@
             </el-form-item>
           </el-col>
         </el-row>
-        <el-form-item label="模板" prop="template">
-          <el-input 
-            v-model="form.template" 
-            type="textarea" 
-            :autosize="{ minRows: 8, maxRows: 20 }"
-            placeholder="请输入Prompt模板内容"
-            show-word-limit
-            resize="vertical"
-          />
-        </el-form-item>
+        <el-row :gutter="20">
+          <el-col :span="12">
+            <el-form-item label="模板" prop="template">
+              <el-input 
+                v-model="form.template" 
+                type="textarea" 
+                :autosize="{ minRows: 8, maxRows: 20 }"
+                placeholder="请输入Prompt模板内容"
+                show-word-limit
+                resize="vertical"
+              />
+            </el-form-item>
+          </el-col>
+          <el-col :span="12">
+            <div style="padding-left:12px;">
+              <label style="display:block;margin-bottom:8px;font-weight:600">模板预览</label>
+              <PromptMarkdownPreview :content="form.template" />
+            </div>
+          </el-col>
+        </el-row>
 
 
 
@@ -200,9 +210,13 @@ import { useRoute, useRouter } from 'vue-router'
 import { ElMessage, ElMessageBox } from 'element-plus'
 import { promptApi } from '@/api/prompt'
 import { Prompt, AI_PROVIDER_OPTIONS, FORMAT_TYPE_OPTIONS, RETURN_TYPE_OPTIONS, PROMPT_TYPE_OPTIONS } from '@/models/prompt'
+import PromptMarkdownPreview from '@/components/PromptMarkdownPreview.vue'
 
 export default {
   name: 'PromptEdit',
+  components: {
+    PromptMarkdownPreview
+  },
   setup() {
     const route = useRoute()
     const router = useRouter()
