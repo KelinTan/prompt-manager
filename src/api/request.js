@@ -48,8 +48,12 @@ api.interceptors.response.use(
           ElMessage.error('登录已过期，请重新登录')
           
           // 避免在登录页面重复跳转
-          if (window.location.hash !== '#/login') {
-            window.location.href = '/#/login'
+          if (!window.location.hash.includes('#/login')) {
+            // Preserve the current pathname (deployment base) when redirecting to the hash route.
+            // e.g. if app is served from https://.../prompt-manager/, this will redirect to
+            // https://.../prompt-manager/#/login instead of https://.../#/login
+            const basePath = window.location.pathname || '/'
+            window.location.href = `${window.location.origin}${basePath}#/login`
           }
           break
           
