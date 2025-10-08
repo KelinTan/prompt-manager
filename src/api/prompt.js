@@ -1,4 +1,5 @@
 import api from '@/api/request'
+import { useAuthStore } from '@/stores/auth'
 
 export const promptApi = {
   // 获取prompt列表
@@ -60,23 +61,17 @@ export const promptApi = {
     const BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:8080'
     const url = `${BASE_URL}/prompts/chat/stream`
     
+    // 使用 auth store 获取token，保持与其他API调用一致
+    const authStore = useAuthStore()
+    const token = authStore.getToken() || ''
+    
     return new Promise((resolve, reject) => {
-      // 创建 EventSource 连接
-      const eventSource = new EventSource(url, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${localStorage.getItem('token') || ''}`
-        },
-        body: JSON.stringify(data)
-      })
-
       // 由于 EventSource 不支持 POST，我们使用 fetch 来处理流式响应
       fetch(url, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          'Authorization': `Bearer ${localStorage.getItem('token') || ''}`
+          'Authorization': `Bearer ${token}`
         },
         body: JSON.stringify(data)
       })
