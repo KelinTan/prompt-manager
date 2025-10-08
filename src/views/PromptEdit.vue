@@ -142,18 +142,39 @@
           </el-col>
           <el-col :span="12">
             <el-form-item label="模型" prop="model">
-              <el-input 
+              <el-select 
                 v-model="form.model" 
-                placeholder="请输入模型名称"
-                maxlength="255"
-                show-word-limit
-              />
+                placeholder="请选择模型"
+                style="width: 100%"
+                :disabled="!form.ai_provider"
+              >
+                <el-option 
+                  v-for="model in availableModels" 
+                  :key="model.value" 
+                  :label="model.label" 
+                  :value="model.value" 
+                />
+              </el-select>
+              <el-text v-if="!form.ai_provider" type="info" size="small" style="margin-top: 4px;">
+                请先选择AI提供商
+              </el-text>
             </el-form-item>
           </el-col>
         </el-row>
         <el-row :gutter="20">
           <el-col :span="12">
             <el-form-item label="模板" prop="template">
+              <div class="template-header">
+                <el-button 
+                  type="primary" 
+                  size="small" 
+                  plain
+                  @click="openInAIAssistant"
+                >
+                  <el-icon><ChatDotRound /></el-icon>
+                  在AI助手中测试
+                </el-button>
+              </div>
               <el-input 
                 v-model="form.template" 
                 type="textarea" 
@@ -201,16 +222,21 @@
         </el-form-item>
       </el-form>
     </el-card>
+
+
   </div>
 </template>
 
 <script>
-import { ref, reactive, computed, onMounted } from 'vue'
+import { ref, reactive, computed, watch, onMounted } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { ElMessage, ElMessageBox } from 'element-plus'
+import { ChatDotRound } from '@element-plus/icons-vue'
 import { promptApi } from '@/api/prompt'
-import { Prompt, AI_PROVIDER_OPTIONS, FORMAT_TYPE_OPTIONS, RETURN_TYPE_OPTIONS, PROMPT_TYPE_OPTIONS } from '@/models/prompt'
+import { Prompt, FORMAT_TYPE_OPTIONS, RETURN_TYPE_OPTIONS, PROMPT_TYPE_OPTIONS } from '@/models/prompt'
+import { AI_PROVIDER_OPTIONS, getModelsByProvider, getDefaultModel } from '@/config/ai'
 import PromptMarkdownPreview from '@/components/PromptMarkdownPreview.vue'
+
 
 export default {
   name: 'PromptEdit',
@@ -224,7 +250,7 @@ export default {
     const saving = ref(false)
     const publishing = ref(false)
     const loading = ref(false)
-  const mockDataError = ref('')
+    const mockDataError = ref('')
 
     // 是否为编辑模式
     const isEdit = computed(() => !!route.params.id)
@@ -252,6 +278,23 @@ export default {
     const formatTypeOptions = FORMAT_TYPE_OPTIONS
     const returnTypeOptions = RETURN_TYPE_OPTIONS
     const typeOptions = PROMPT_TYPE_OPTIONS
+
+    // 计算可用模型
+    const availableModels = computed(() => {
+      return getModelsByProvider(form.ai_provider)
+    })
+
+    // 监听AI供应商变化，自动更新模型
+    watch(() => form.ai_provider, (newProvider) => {
+      if (newProvider) {
+        const models = getModelsByProvider(newProvider)
+        if (models.length > 0 && !models.find(m => m.value === form.model)) {
+          form.model = getDefaultModel(newProvider)
+        }
+      }
+    })
+
+
 
     // 验证规则
     const rules = {
@@ -444,6 +487,24 @@ export default {
       }
     }
 
+    // 在AI助手中打开测试
+    const openInAIAssistant = () => {
+      // 将当前的配置信息存储到localStorage，供AI助手页面使用
+      const configData = {
+        model: form.model,
+        aiProvider: form.ai_provider,
+        template: form.template,
+        timestamp: Date.now()
+      }
+      localStorage.setItem('ai-assistant-config', JSON.stringify(configData))
+      
+      // 在新标签页打开AI助手
+      const routeData = router.resolve({ name: 'AIAssistant' })
+      window.open(routeData.href, '_blank')
+      
+      ElMessage.success('已在新标签页打开AI助手')
+    }
+
     // 返回
     const handleBack = () => {
       router.push('/prompts')
@@ -460,9 +521,11 @@ export default {
       publishing,
       loading,
       isEdit,
-  mockDataText,
-  mockDataError,
+      mockDataText,
+      mockDataError,
+      openInAIAssistant,
       aiProviderOptions,
+      availableModels,
       formatTypeOptions,
       returnTypeOptions,
       typeOptions,
@@ -537,5 +600,11 @@ export default {
 
 :deep(.el-form-item:has([prop="template"]) .el-textarea__inner:hover) {
   border-color: #c0c4cc;
+}
+
+.template-header {
+  display: flex;
+  justify-content: flex-end;
+  margin-bottom: 8px;
 }
 </style>

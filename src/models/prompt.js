@@ -52,12 +52,7 @@ export const FORMAT_TYPE_OPTIONS = [
   { label: '无', value: 'none' }
 ]
 
-// AI提供商选项
-export const AI_PROVIDER_OPTIONS = [
-  { label: 'OpenAI', value: 'openai' },
-  { label: 'DashScope', value: 'dashscope' },
-  { label: 'Deepseek', value: 'deepseek' }
-]
+
 
 // 返回类型选项
 export const RETURN_TYPE_OPTIONS = [

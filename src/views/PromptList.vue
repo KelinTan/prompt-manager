@@ -222,7 +222,8 @@ import { ref, reactive, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
 import { ElMessage, ElMessageBox } from 'element-plus'
 import { promptApi } from '@/api/prompt'
-import { FORMAT_TYPE_OPTIONS, AI_PROVIDER_OPTIONS, PROMPT_STATUS_OPTIONS } from '@/models/prompt'
+import { FORMAT_TYPE_OPTIONS, PROMPT_STATUS_OPTIONS } from '@/models/prompt'
+import { AI_PROVIDER_OPTIONS } from '@/config/ai'
 
 export default {
   name: 'PromptList',

@@ -41,6 +41,12 @@ const routes = [
     name: 'PromptVersion',
     component: () => import('@/views/PromptVersion.vue'),
     meta: { title: 'Prompt 版本详情', requiresAuth: true }
+  },
+  {
+    path: '/ai-assistant',
+    name: 'AIAssistant',
+    component: () => import('@/views/AIAssistant.vue'),
+    meta: { title: 'AI助手', requiresAuth: true }
   }
 ]
 

@@ -15,6 +15,18 @@
             <h1 class="brand-title">{{ appTitle }}</h1>
           </div>
           
+          <!-- 导航菜单 -->
+          <nav class="navbar-nav">
+            <router-link to="/prompts" class="nav-link" :class="{ active: isPromptRoute }">
+              <el-icon><Document /></el-icon>
+              <span>Prompt管理</span>
+            </router-link>
+            <router-link to="/ai-assistant" class="nav-link" :class="{ active: route.path === '/ai-assistant' }">
+              <el-icon><ChatDotRound /></el-icon>
+              <span>AI助手</span>
+            </router-link>
+          </nav>
+          
           <div class="navbar-actions">
             <div class="user-section">
               <el-dropdown @command="handleUserCommand" trigger="click">
@@ -53,6 +65,7 @@
 import { computed } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { ElMessage, ElMessageBox } from 'element-plus'
+import { Document, ChatDotRound, User, ArrowDown, SwitchButton } from '@element-plus/icons-vue'
 import { config } from '@/utils/config'
 import { useAuthStore } from '@/stores/auth'
 
@@ -66,6 +79,9 @@ export default {
     
     // 检查是否为登录页面
     const isLoginPage = computed(() => route.path === '/login')
+    
+    // 检查是否为Prompt相关路由
+    const isPromptRoute = computed(() => route.path.startsWith('/prompts'))
     
     // 用户操作处理
     const handleUserCommand = async (command) => {
@@ -96,6 +112,8 @@ export default {
     return {
       appTitle,
       isLoginPage,
+      isPromptRoute,
+      route,
       authStore,
       handleUserCommand
     }
