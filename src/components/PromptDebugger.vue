@@ -230,9 +230,6 @@ import { ElMessage } from 'element-plus'
 import { Loading, Back, Plus, Delete } from '@element-plus/icons-vue'
 import { promptApi } from '@/api/prompt'
 import { 
-  AI_PROVIDER_OPTIONS, 
-  MODEL_OPTIONS, 
-  getModelsByProvider, 
   getDefaultModel, 
   isValidModelForProvider,
   getDebugSupportedProviders,
