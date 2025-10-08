@@ -71,7 +71,10 @@ export const promptApi = {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          'Authorization': `Bearer ${token}`
+          'Authorization': `Bearer ${token}`,
+          'Cache-Control': 'no-cache',
+          'Accept': 'text/event-stream',
+          'X-Requested-With': 'fetch'
         },
         body: JSON.stringify(data)
       })
