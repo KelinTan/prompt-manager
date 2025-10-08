@@ -494,6 +494,7 @@ export default {
         model: form.model,
         aiProvider: form.ai_provider,
         template: form.template,
+        formatType: form.format_type,
         timestamp: Date.now()
       }
       localStorage.setItem('ai-assistant-config', JSON.stringify(configData))

@@ -260,6 +260,10 @@ export default {
       type: String,
       default: ''
     },
+    formatType: {
+      type: String,
+      default: 'square_brackets'
+    },
     autoStart: {
       type: Boolean,
       default: false
@@ -666,6 +670,11 @@ export default {
         debugConfig.value.aiProvider = provider
         debugConfig.value.template = config.template || debugConfig.value.template
         
+        // 加载参数格式类型
+        if (config.formatType) {
+          debugConfig.value.formatType = config.formatType
+        }
+        
         // 验证模型是否适用于当前提供商
         if (config.model && isValidModelForProvider(config.model, provider)) {
           debugConfig.value.model = config.model
@@ -695,10 +704,11 @@ export default {
     }, { immediate: true })
 
     // 监听props变化，同步到配置
-    watch(() => [props.model, props.aiProvider, props.template], ([model, aiProvider, template]) => {
+    watch(() => [props.model, props.aiProvider, props.template, props.formatType], ([model, aiProvider, template, formatType]) => {
       const provider = aiProvider || debugConfig.value.aiProvider
       debugConfig.value.aiProvider = provider
       debugConfig.value.template = template || debugConfig.value.template
+      debugConfig.value.formatType = formatType || debugConfig.value.formatType
       
       // 设置模型：优先使用props中的model，如果没有则使用该提供商的默认模型
       if (model) {
