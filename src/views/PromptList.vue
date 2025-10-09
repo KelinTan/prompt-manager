@@ -16,8 +16,8 @@
           <div class="search-container">
             <div class="search-row">
               <el-input 
-                v-model="searchForm.title" 
-                placeholder="搜索 Prompt..."
+                v-model="searchForm.keyword" 
+                placeholder="搜索名称或标题..."
                 class="search-input"
                 size="large"
                 clearable
@@ -235,7 +235,7 @@ export default {
 
     // 搜索表单
     const searchForm = reactive({
-      title: '',
+      keyword: '', // 用于同时搜索名称和标题
       ai_provider: ''
     })
 
@@ -315,7 +315,7 @@ export default {
 
     // 重置搜索
     const handleReset = () => {
-      searchForm.title = ''
+      searchForm.keyword = ''
       searchForm.ai_provider = ''
       handleSearch()
     }
@@ -491,9 +491,37 @@ export default {
   min-width: 200px;
 }
 
+.search-input :deep(.el-input__wrapper) {
+  background: #f5f7fa;
+  box-shadow: 0 0 0 1px var(--border-color) inset;
+  border-radius: var(--radius-lg);
+  transition: all 0.2s ease;
+  height: 40px;
+}
+
+.search-input :deep(.el-input__wrapper:hover) {
+  box-shadow: 0 0 0 1px var(--primary-light) inset;
+}
+
+.search-input :deep(.el-input__wrapper.is-focus) {
+  box-shadow: 0 0 0 1px var(--el-color-primary) inset;
+  background: #ffffff;
+}
+
 .provider-select {
   flex: 1;
   min-width: 150px;
+}
+
+.provider-select :deep(.el-input__wrapper) {
+  background: #f5f7fa;
+  box-shadow: 0 0 0 1px var(--border-color) inset;
+  border-radius: var(--radius-lg);
+  height: 40px;
+}
+
+.provider-select :deep(.el-input__wrapper:hover) {
+  box-shadow: 0 0 0 1px var(--primary-light) inset;
 }
 
 .reset-btn {
