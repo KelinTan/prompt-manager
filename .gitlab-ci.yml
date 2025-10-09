@@ -19,8 +19,8 @@ variables:
   BUILD_DIR: "dist"
   APPLICATION_NAME: "prompt-manager"
 
-# 构建阶段
-build_beta:
+# 定义可复用的构建模板
+.build_template: &build_template
   stage: build
   before_script:
     - echo "开始构建应用..."
@@ -30,30 +30,59 @@ build_beta:
     - echo "安装依赖..."
     - npm ci --cache .npm --prefer-offline
     - echo "构建项目..."
-    - npm run build:beta
+    - npm run ${BUILD_COMMAND}
     - echo "构建完成，验证构建产物..."
     - ls -la $BUILD_DIR/
   artifacts:
     paths:
       - $BUILD_DIR/
     expire_in: 1 hour
-  only:
-    - develop
   tags:
     - docker-ali
 
+# 定义可复用的部署模板
+.deploy_template: &deploy_template
+  stage: deploy
+  before_script:
+    - ossutil config -e $OSS_ENDPOINT -i $OSS_ACCESS_KEY_ID -k $OSS_ACCESS_KEY_SECRET
+  script:
+    - ossutil sync $BUILD_DIR/ oss://$OSS_BUCKET_NAME/$APPLICATION_NAME/ --delete --force
+  tags:
+    - docker-ali
+
+# 构建阶段 - Beta
+build_beta:
+  <<: *build_template
+  variables:
+    BUILD_COMMAND: "build:beta"
+  only:
+    - develop
+
 # Beta 环境部署
 deploy_beta:
-  stage: deploy
+  <<: *deploy_template
   dependencies:
     - build_beta
-  before_script:
-  - ossutil config -e $OSS_ENDPOINT -i $OSS_ACCESS_KEY_ID -k $OSS_ACCESS_KEY_SECRET
-  script:
-  - ossutil sync $BUILD_DIR/ oss://$OSS_BUCKET_NAME/$APPLICATION_NAME/ --delete --force
   environment:
     name: beta
   only:
     - develop
-  tags:
-    - docker-ali
+
+# 构建阶段 - Production
+build_production:
+  <<: *build_template
+  variables:
+    BUILD_COMMAND: "build:production"
+  only:
+    - master
+
+# Production 环境部署
+deploy_production:
+  <<: *deploy_template
+  dependencies:
+    - build_production
+  environment:
+    name: production
+  only:
+    - master
+  when: manual  # 需要手动确认才能部署到生产环境
