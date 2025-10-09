@@ -60,13 +60,19 @@
           <el-input
             v-model="debugConfig.template"
             type="textarea"
-            :rows="8"
+            :autosize="{ minRows: 8, maxRows: 20 }"
             placeholder="编辑你的prompt模板..."
             show-word-limit
+            resize="vertical"
           />
-          <el-text type="info" size="small" style="margin-top: 4px;">
-            根据选择的参数格式在模板中使用参数，如：[用户名]、{产品名称} 等
-          </el-text>
+          <div style="margin-top: 8px; display: flex; justify-content: space-between; align-items: center;">
+            <el-text type="info" size="small">
+              根据选择的参数格式在模板中使用参数，如：[用户名]、{产品名称} 等
+            </el-text>
+            <el-button size="small" @click="showPreviewDialog = true" :disabled="!debugConfig.template">
+              预览模板
+            </el-button>
+          </div>
         </el-form-item>
 
         <!-- 参数设置区域 -->
@@ -220,6 +226,14 @@
       </div>
     </div>
 
+    <!-- Markdown 预览弹窗 -->
+    <el-dialog
+      v-model="showPreviewDialog"
+      title="模板预览"
+      width="70%"
+    >
+      <PromptMarkdownPreview :content="debugConfig.template" />
+    </el-dialog>
 
   </div>
 </template>
@@ -229,6 +243,7 @@ import { ref, computed, watch } from 'vue'
 import { ElMessage } from 'element-plus'
 import { Loading, Back, Plus, Delete } from '@element-plus/icons-vue'
 import { promptApi } from '@/api/prompt'
+import PromptMarkdownPreview from '@/components/PromptMarkdownPreview.vue'
 import { 
   getDefaultModel, 
   isValidModelForProvider,
@@ -242,7 +257,8 @@ export default {
   name: 'PromptDebugger',
   components: {
     Loading,
-    Back
+    Back,
+    PromptMarkdownPreview
   },
   props: {
     model: {
@@ -281,6 +297,7 @@ export default {
     const fullText = ref('') // 完整文本
     const hasStarted = ref(false) // 是否已开始调试
     const advancedSettingsOpen = ref([]) // 高级设置展开状态
+    const showPreviewDialog = ref(false) // 控制预览弹窗显示
 
     // 调试配置
     const debugConfig = ref({
@@ -364,10 +381,12 @@ export default {
       // 根据格式化类型选择正则表达式
       switch (formatType) {
         case 'square_brackets':
-          regex = /\[([^\]]+)\]/g
+          // 只匹配不包含引号、冒号等JSON字符的参数
+          regex = /\[([a-zA-Z_][a-zA-Z0-9_]*)\]/g
           break
         case 'braces':
-          regex = /\{([^}]+)\}/g
+          // 只匹配不包含引号、冒号等JSON字符的参数
+          regex = /\{([a-zA-Z_][a-zA-Z0-9_]*)\}/g
           break
         case 'none':
         default:
@@ -759,6 +778,7 @@ export default {
       currentVisibleText,
       hasStarted,
       advancedSettingsOpen,
+      showPreviewDialog,
       debugConfig,
       aiProviderOptions,
       formatTypeOptions,
@@ -899,6 +919,7 @@ export default {
   background: #f8f9fa;
   border-radius: 6px;
   border-left: 4px solid #409eff;
+  overflow: hidden;
 }
 
 .result-header {
@@ -941,10 +962,20 @@ export default {
   margin-bottom: 12px;
 }
 
+.parameter-item :deep(.el-form-item__label) {
+  max-width: 200px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
 .parameter-input-group {
   display: flex;
   align-items: center;
   gap: 8px;
+  width: 100%;
+  max-width: 100%;
+  overflow: hidden;
 }
 
 .empty-parameters {

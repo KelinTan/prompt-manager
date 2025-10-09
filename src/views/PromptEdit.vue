@@ -161,39 +161,31 @@
             </el-form-item>
           </el-col>
         </el-row>
-        <el-row :gutter="20">
-          <el-col :span="12">
-            <el-form-item label="模板" prop="template">
-              <div class="template-header">
-                <el-button 
-                  type="primary" 
-                  size="small" 
-                  plain
-                  @click="openInAIAssistant"
-                >
-                  <el-icon><ChatDotRound /></el-icon>
-                  在AI助手中测试
-                </el-button>
-              </div>
-              <el-input 
-                v-model="form.template" 
-                type="textarea" 
-                :autosize="{ minRows: 8, maxRows: 20 }"
-                placeholder="请输入Prompt模板内容"
-                show-word-limit
-                resize="vertical"
-              />
-            </el-form-item>
-          </el-col>
-          <el-col :span="12">
-            <div style="padding-left:12px;">
-              <label style="display:block;margin-bottom:8px;font-weight:600">模板预览</label>
-              <PromptMarkdownPreview :content="form.template" />
-            </div>
-          </el-col>
-        </el-row>
-
-
+        
+        <el-form-item label="模板" prop="template">
+          <el-input 
+            v-model="form.template" 
+            type="textarea" 
+            :autosize="{ minRows: 8, maxRows: 20 }"
+            placeholder="请输入Prompt模板内容"
+            show-word-limit
+            resize="vertical"
+          />
+          <div style="margin-top: 8px; display: flex; justify-content: flex-end; gap: 8px;">
+            <el-button type="primary" size="small" plain @click="showPreviewDialog = true" :disabled="!form.template">
+              预览模板
+            </el-button>
+            <el-button 
+              type="primary" 
+              size="small" 
+              plain
+              @click="openInAIAssistant"
+            >
+              <el-icon><ChatDotRound /></el-icon>
+              在AI助手中测试
+            </el-button>
+          </div>
+        </el-form-item>
 
         <!-- (启用Mock 已在上面的 行中与 格式化类型 配对) -->
 
@@ -223,6 +215,14 @@
       </el-form>
     </el-card>
 
+    <!-- Markdown 预览弹窗 -->
+    <el-dialog
+      v-model="showPreviewDialog"
+      title="模板预览"
+      width="70%"
+    >
+      <PromptMarkdownPreview :content="form.template" />
+    </el-dialog>
 
   </div>
 </template>
@@ -251,6 +251,7 @@ export default {
     const publishing = ref(false)
     const loading = ref(false)
     const mockDataError = ref('')
+    const showPreviewDialog = ref(false) // 控制预览弹窗显示
 
     // 是否为编辑模式
     const isEdit = computed(() => !!route.params.id)
@@ -524,6 +525,7 @@ export default {
       isEdit,
       mockDataText,
       mockDataError,
+      showPreviewDialog,
       openInAIAssistant,
       aiProviderOptions,
       availableModels,
