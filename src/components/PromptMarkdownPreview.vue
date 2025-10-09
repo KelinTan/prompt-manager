@@ -102,10 +102,17 @@ const sanitizedHtml = computed(() => {
 .markdown-preview {
   background: var(--bg-primary);
   border: 1px solid var(--border-color);
-  padding: 12px;
+  padding: 16px;
   border-radius: 8px;
   min-height: 120px;
   overflow: auto;
+  box-sizing: border-box;
+}
+
+.markdown-body {
+  overflow-wrap: break-word;
+  word-wrap: break-word;
+  word-break: break-word;
 }
 
 .markdown-body h1 { font-size: 1.6em; margin: 0.5em 0; }
