@@ -2,7 +2,7 @@
   <div class="prompt-debugger">
     <!-- 调试配置区域 -->
     <div v-if="!hasStarted" class="debug-config">
-      <el-form :model="debugConfig" label-width="100px" size="default">
+      <el-form :model="debugConfig" label-width="250px" size="default">
         <el-form-item label="AI提供商">
           <el-select 
             v-model="debugConfig.aiProvider" 
@@ -97,7 +97,7 @@
               v-for="variable in templateVariables" 
               :key="`auto-${variable}`"
               :label="variable"
-              class="parameter-item"
+              class="parameter-item auto-parameter-item"
             >
               <el-input
                 v-model="debugConfig.variables[variable]"
@@ -113,7 +113,7 @@
               v-for="(param, index) in customParameters" 
               :key="`custom-${index}`"
               :label="param.name"
-              class="parameter-item"
+              class="parameter-item custom-parameter-item"
             >
               <div class="parameter-input-group">
                 <el-input
@@ -918,7 +918,8 @@ export default {
   padding: 16px;
   background: #f8f9fa;
   border-radius: 6px;
-  border-left: 4px solid #409eff;
+  border: 1px solid #dcdfe6;
+  /* border-left: 4px solid #409eff; */
   overflow: hidden;
 }
 
@@ -960,13 +961,28 @@ export default {
 
 .parameter-item {
   margin-bottom: 12px;
+  padding: 12px;
+  background: #ffffff;
+  border: 1px solid #dcdfe6;
+  border-radius: 4px;
 }
 
 .parameter-item :deep(.el-form-item__label) {
-  max-width: 200px;
-  overflow: hidden;
-  text-overflow: ellipsis;
+  max-width: 250px;
+  min-width: 250px;
+  overflow: visible;
+  text-overflow: unset;
   white-space: nowrap;
+  word-break: keep-all;
+  line-height: 1.4;
+  text-align: left;
+}
+
+/* 自动检测的参数标签单行显示 */
+.auto-parameter-item :deep(.el-form-item__label) {
+  white-space: nowrap;
+  overflow: visible;
+  text-align: left;
 }
 
 .parameter-input-group {
