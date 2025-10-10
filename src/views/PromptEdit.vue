@@ -496,6 +496,8 @@ export default {
         aiProvider: form.ai_provider,
         template: form.template,
         formatType: form.format_type,
+        type: form.type,
+        urls: form.urls || [],
         timestamp: Date.now()
       }
       localStorage.setItem('ai-assistant-config', JSON.stringify(configData))

@@ -56,6 +56,56 @@
           </el-text>
         </el-form-item>
 
+        <el-form-item label="Prompt类型">
+          <el-select 
+            v-model="debugConfig.type" 
+            placeholder="选择Prompt类型" 
+            style="width: 100%"
+          >
+            <el-option 
+              v-for="typeOption in promptTypeOptions" 
+              :key="typeOption.value" 
+              :label="typeOption.label" 
+              :value="typeOption.value" 
+            />
+          </el-select>
+          <el-text type="info" size="small" style="margin-top: 4px;">
+            选择Prompt的类型（文本、图片、音频、视频等）
+          </el-text>
+        </el-form-item>
+
+        <el-form-item v-if="needsUrls" label="资源URLs">
+          <div style="width: 100%;">
+            <div 
+              v-for="(url, index) in debugConfig.urls" 
+              :key="index"
+              style="display: flex; gap: 8px; margin-bottom: 8px;"
+            >
+              <el-input
+                v-model="debugConfig.urls[index]"
+                placeholder="请输入URL地址"
+                style="flex: 1;"
+              />
+              <el-button 
+                type="danger" 
+                size="default" 
+                @click="removeUrl(index)"
+                :icon="ElIconDelete"
+              />
+            </div>
+            <el-button 
+              size="small" 
+              @click="addUrl"
+              :icon="ElIconPlus"
+            >
+              添加URL
+            </el-button>
+          </div>
+          <el-text type="info" size="small" style="margin-top: 4px; display: block;">
+            {{ debugConfig.type === 'audio' ? '音频' : '视频' }}类型需要提供至少一个URL
+          </el-text>
+        </el-form-item>
+
         <el-form-item label="Prompt模板">
           <el-input
             v-model="debugConfig.template"
@@ -248,10 +298,9 @@ import {
   getDefaultModel, 
   isValidModelForProvider,
   getDebugSupportedProviders,
-  getDebugSupportedModelsByProvider,
-  isModelSupportedForDebug
+  getDebugSupportedModelsByProvider
 } from '@/config/ai'
-import { FORMAT_TYPE_OPTIONS } from '@/models/prompt'
+import { FORMAT_TYPE_OPTIONS, PROMPT_TYPE_OPTIONS } from '@/models/prompt'
 
 export default {
   name: 'PromptDebugger',
@@ -276,6 +325,14 @@ export default {
     formatType: {
       type: String,
       default: 'square_brackets'
+    },
+    type: {
+      type: String,
+      default: 'text'
+    },
+    urls: {
+      type: Array,
+      default: () => []
     },
     autoStart: {
       type: Boolean,
@@ -305,6 +362,8 @@ export default {
       aiProvider: props.aiProvider || 'openai',
       template: props.template || '',
       formatType: props.formatType || 'square_brackets',
+      type: props.type || 'text',
+      urls: props.urls || [],
       variables: {},
     //   temperature: 0.7,
     //   maxTokens: 1000
@@ -318,6 +377,14 @@ export default {
     
     // 格式化类型选项
     const formatTypeOptions = FORMAT_TYPE_OPTIONS
+    
+    // Prompt类型选项
+    const promptTypeOptions = PROMPT_TYPE_OPTIONS
+    
+    // 判断当前类型是否需要 URLs
+    const needsUrls = computed(() => {
+      return debugConfig.value.type === 'audio' || debugConfig.value.type === 'video'
+    })
 
     // 根据当前提供商获取可用的模型（仅支持调试的模型）
     const availableModels = computed(() => {
@@ -365,6 +432,19 @@ export default {
         }
         oldParam.name = newName
       }
+    }
+    
+    // 添加 URL
+    const addUrl = () => {
+      if (!debugConfig.value.urls) {
+        debugConfig.value.urls = []
+      }
+      debugConfig.value.urls.push('')
+    }
+    
+    // 移除 URL
+    const removeUrl = (index) => {
+      debugConfig.value.urls.splice(index, 1)
     }
     
     // 计算当前可见的文本
@@ -461,9 +541,6 @@ export default {
                                config.aiProvider?.trim() && 
                                config.template?.trim()
       
-      // 检查模型是否支持调试
-      const isModelSupported = isModelSupportedForDebug(config.model, config.aiProvider)
-      
       // 检查自动提取的变量是否都有值
       const hasAllAutoVariables = templateVariables.value.every(variable => 
         config.variables[variable]?.trim()
@@ -474,7 +551,7 @@ export default {
         param.name?.trim() && config.variables[param.name]?.trim()
       )
       
-      return hasRequiredFields && isModelSupported && hasAllAutoVariables && hasAllCustomVariables
+      return hasRequiredFields && hasAllAutoVariables && hasAllCustomVariables
     })
 
     // 开始调试
@@ -504,7 +581,9 @@ export default {
         await promptApi.debugPromptStream({
           message: message,
           model: props.model,
-          ai_provider: props.aiProvider
+          ai_provider: props.aiProvider,
+          type: props.type,
+          urls: props.urls
         }, (chunk) => {
           // 累积完整文本
           fullText.value += chunk
@@ -609,6 +688,8 @@ export default {
           message: message,
           model: debugConfig.value.model,
           ai_provider: debugConfig.value.aiProvider,
+          type: debugConfig.value.type,
+          urls: debugConfig.value.urls,
           temperature: debugConfig.value.temperature,
           max_tokens: debugConfig.value.maxTokens
         }, (chunk) => {
@@ -691,6 +772,16 @@ export default {
           debugConfig.value.formatType = config.formatType
         }
         
+        // 加载 Prompt 类型
+        if (config.type) {
+          debugConfig.value.type = config.type
+        }
+        
+        // 加载 URLs（如果有）
+        if (config.urls && Array.isArray(config.urls)) {
+          debugConfig.value.urls = config.urls
+        }
+        
         // 验证模型是否适用于当前提供商
         if (config.model && isValidModelForProvider(config.model, provider)) {
           debugConfig.value.model = config.model
@@ -720,11 +811,13 @@ export default {
     }, { immediate: true })
 
     // 监听props变化，同步到配置
-    watch(() => [props.model, props.aiProvider, props.template, props.formatType], ([model, aiProvider, template, formatType]) => {
+    watch(() => [props.model, props.aiProvider, props.template, props.formatType, props.type, props.urls], ([model, aiProvider, template, formatType, type, urls]) => {
       const provider = aiProvider || debugConfig.value.aiProvider
       debugConfig.value.aiProvider = provider
       debugConfig.value.template = template || debugConfig.value.template
       debugConfig.value.formatType = formatType || debugConfig.value.formatType
+      debugConfig.value.type = type || debugConfig.value.type
+      debugConfig.value.urls = urls || debugConfig.value.urls
       
       // 设置模型：优先使用props中的model，如果没有则使用该提供商的默认模型
       if (model) {
@@ -782,6 +875,8 @@ export default {
       debugConfig,
       aiProviderOptions,
       formatTypeOptions,
+      promptTypeOptions,
+      needsUrls,
       availableModels,
       customParameters,
       onProviderChange,
@@ -799,6 +894,8 @@ export default {
       addCustomParameter,
       removeCustomParameter,
       updateParameterName,
+      addUrl,
+      removeUrl,
       // 图标组件
       ElIconPlus: Plus,
       ElIconDelete: Delete

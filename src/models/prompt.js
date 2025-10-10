@@ -13,6 +13,7 @@ export class Prompt {
     this.remark = data.remark || ''
     this.format_type = data.format_type || 'none'
     this.ai_provider = data.ai_provider || 'openai'
+    this.urls = data.urls || [] // audio/video 类型的 URL 列表
     this.created_at = data.created_at || null
     this.updated_at = data.updated_at || null
     this.version = data.version || 1
@@ -39,7 +40,18 @@ export class Prompt {
     if (!this.name.trim()) errors.push('唯一标识不能为空')
     if (!this.title.trim()) errors.push('标题不能为空')
     if (!this.template.trim()) errors.push('模板不能为空')
+    
+    // audio 和 video 类型需要至少一个 URL
+    if ((this.type === 'audio' || this.type === 'video') && (!this.urls || this.urls.length === 0)) {
+      errors.push(`${this.type === 'audio' ? '音频' : '视频'}类型需要至少提供一个URL`)
+    }
+    
     return errors
+  }
+
+  // 判断当前类型是否需要 URLs
+  needsUrls() {
+    return this.type === 'audio' || this.type === 'video'
   }
 
 
@@ -63,7 +75,9 @@ export const RETURN_TYPE_OPTIONS = [
 // Prompt类型选项
 export const PROMPT_TYPE_OPTIONS = [
   { label: 'Text', value: 'text' },
-  { label: 'Image', value: 'image' }
+  { label: 'Image', value: 'image' },
+  { label: 'Audio', value: 'audio' },
+  { label: 'Video', value: 'video' }
 ]
 
 // Prompt状态选项
