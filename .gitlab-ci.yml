@@ -47,6 +47,13 @@ variables:
     - ossutil config -e $OSS_ENDPOINT -i $OSS_ACCESS_KEY_ID -k $OSS_ACCESS_KEY_SECRET
   script:
     - ossutil sync $BUILD_DIR/ oss://$OSS_BUCKET_NAME/$APPLICATION_NAME/ --delete --force
+    - |
+      if [ -n "$OSS_CDN_ENDPOINT" ]; then
+        echo "================================================"
+        echo "🚀 部署成功！"
+        echo "📍 项目访问地址: $OSS_CDN_ENDPOINT/$APPLICATION_NAME/index.html"
+        echo "================================================"
+      fi
   tags:
     - docker-ali
 
