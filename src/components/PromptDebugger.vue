@@ -102,7 +102,7 @@
             </el-button>
           </div>
           <el-text type="info" size="small" style="margin-top: 4px; display: block;">
-            {{ debugConfig.type === 'audio' ? '音频' : '视频' }}类型需要提供至少一个URL
+            {{ debugConfig.type === 'image' ? '图片' : (debugConfig.type === 'audio' ? '音频' : '视频') }}类型需要提供至少一个URL
           </el-text>
         </el-form-item>
 
@@ -383,7 +383,9 @@ export default {
     
     // 判断当前类型是否需要 URLs
     const needsUrls = computed(() => {
-      return debugConfig.value.type === 'audio' || debugConfig.value.type === 'video'
+      return debugConfig.value.type === 'image' || 
+             debugConfig.value.type === 'audio' || 
+             debugConfig.value.type === 'video'
     })
 
     // 根据当前提供商获取可用的模型（仅支持调试的模型）
