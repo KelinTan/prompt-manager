@@ -218,12 +218,15 @@
 </template>
 
 <script>
-import { ref, reactive, onMounted } from 'vue'
+import { ref, reactive, onMounted, onBeforeUnmount, watch } from 'vue'
 import { useRouter } from 'vue-router'
 import { ElMessage, ElMessageBox } from 'element-plus'
 import { promptApi } from '@/api/prompt'
 import { FORMAT_TYPE_OPTIONS, PROMPT_STATUS_OPTIONS } from '@/models/prompt'
 import { AI_PROVIDER_OPTIONS } from '@/config/ai'
+
+const SEARCH_STORAGE_KEY = 'promptListSearchState'
+const PAGINATION_STORAGE_KEY = 'promptListPaginationState'
 
 export default {
   name: 'PromptList',
@@ -233,18 +236,26 @@ export default {
     const prompts = ref([])
     const publishingIds = ref(new Set())
 
-    // 搜索表单
-    const searchForm = reactive({
-      keyword: '', // 用于同时搜索名称和标题
+    // 从 sessionStorage 恢复搜索条件
+    const savedSearchState = sessionStorage.getItem(SEARCH_STORAGE_KEY)
+    const initialSearchState = savedSearchState ? JSON.parse(savedSearchState) : {
+      keyword: '',
       ai_provider: ''
-    })
+    }
 
-    // 分页
-    const pagination = reactive({
+    // 从 sessionStorage 恢复分页状态
+    const savedPaginationState = sessionStorage.getItem(PAGINATION_STORAGE_KEY)
+    const initialPaginationState = savedPaginationState ? JSON.parse(savedPaginationState) : {
       page: 1,
       size: 12,
       total: 0
-    })
+    }
+
+    // 搜索表单
+    const searchForm = reactive(initialSearchState)
+
+    // 分页
+    const pagination = reactive(initialPaginationState)
 
     // AI提供商选项
     const aiProviderOptions = AI_PROVIDER_OPTIONS
@@ -317,6 +328,10 @@ export default {
     const handleReset = () => {
       searchForm.keyword = ''
       searchForm.ai_provider = ''
+      pagination.page = 1
+      // 清除存储的状态
+      sessionStorage.removeItem(SEARCH_STORAGE_KEY)
+      sessionStorage.removeItem(PAGINATION_STORAGE_KEY)
       handleSearch()
     }
 
@@ -389,7 +404,21 @@ export default {
       }
     }
 
+    // 监听搜索条件变化，保存到 sessionStorage
+    watch(searchForm, (newVal) => {
+      sessionStorage.setItem(SEARCH_STORAGE_KEY, JSON.stringify(newVal))
+    }, { deep: true })
 
+    // 监听分页状态变化，保存到 sessionStorage
+    watch(pagination, (newVal) => {
+      sessionStorage.setItem(PAGINATION_STORAGE_KEY, JSON.stringify(newVal))
+    }, { deep: true })
+
+    // 组件卸载前清理（可选，如果希望关闭标签页后清除状态）
+    // onBeforeUnmount(() => {
+    //   sessionStorage.removeItem(SEARCH_STORAGE_KEY)
+    //   sessionStorage.removeItem(PAGINATION_STORAGE_KEY)
+    // })
 
     onMounted(() => {
       loadData()
