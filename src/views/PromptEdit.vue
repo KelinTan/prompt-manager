@@ -155,8 +155,14 @@
                   :value="model.value" 
                 />
               </el-select>
-              <el-text v-if="!form.ai_provider" type="info" size="small" style="margin-top: 4px;">
+              <el-text v-if="!form.ai_provider" type="info" size="small" style="margin-top: 4px; display: block;">
                 请先选择AI提供商
+              </el-text>
+              <el-text v-else-if="availableModels.length === 0" type="warning" size="small" style="margin-top: 4px; display: block;">
+                当前提供商没有支持 {{ form.type || 'text' }} 类型的模型
+              </el-text>
+              <el-text v-else-if="form.type && form.type !== 'text'" type="info" size="small" style="margin-top: 4px; display: block;">
+                仅显示支持 {{ form.type }} 类型的模型
               </el-text>
             </el-form-item>
           </el-col>
@@ -234,7 +240,7 @@ import { ElMessage, ElMessageBox } from 'element-plus'
 import { ChatDotRound } from '@element-plus/icons-vue'
 import { promptApi } from '@/api/prompt'
 import { Prompt, FORMAT_TYPE_OPTIONS, RETURN_TYPE_OPTIONS, PROMPT_TYPE_OPTIONS } from '@/models/prompt'
-import { AI_PROVIDER_OPTIONS, getModelsByProvider, getDefaultModel } from '@/config/ai'
+import { AI_PROVIDER_OPTIONS, getModelsByProvider, getDefaultModel, getModelsByProviderAndType, isModelSupportType } from '@/config/ai'
 import PromptMarkdownPreview from '@/components/PromptMarkdownPreview.vue'
 
 
@@ -280,17 +286,36 @@ export default {
     const returnTypeOptions = RETURN_TYPE_OPTIONS
     const typeOptions = PROMPT_TYPE_OPTIONS
 
-    // 计算可用模型
+    // 计算可用模型（根据 prompt 类型过滤）
     const availableModels = computed(() => {
-      return getModelsByProvider(form.ai_provider)
+      if (!form.ai_provider) return []
+      return getModelsByProviderAndType(form.ai_provider, form.type)
     })
 
     // 监听AI供应商变化，自动更新模型
     watch(() => form.ai_provider, (newProvider) => {
       if (newProvider) {
-        const models = getModelsByProvider(newProvider)
+        const models = getModelsByProviderAndType(newProvider, form.type)
         if (models.length > 0 && !models.find(m => m.value === form.model)) {
-          form.model = getDefaultModel(newProvider)
+          form.model = models[0]?.value || getDefaultModel(newProvider)
+        }
+      }
+    })
+
+    // 监听 prompt 类型变化，检查当前模型是否支持
+    watch(() => form.type, (newType) => {
+      if (form.model && form.ai_provider) {
+        // 检查当前模型是否支持新类型
+        if (!isModelSupportType(form.model, form.ai_provider, newType)) {
+          // 如果不支持，尝试选择一个支持该类型的模型
+          const supportedModels = getModelsByProviderAndType(form.ai_provider, newType)
+          if (supportedModels.length > 0) {
+            form.model = supportedModels[0].value
+            ElMessage.warning(`当前模型不支持 ${newType} 类型，已自动切换到 ${supportedModels[0].label}`)
+          } else {
+            ElMessage.warning(`当前提供商没有支持 ${newType} 类型的模型`)
+            form.model = ''
+          }
         }
       }
     })

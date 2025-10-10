@@ -33,8 +33,14 @@
               :value="model.value" 
             />
           </el-select>
-          <el-text v-if="!debugConfig.aiProvider" type="info" size="small" style="margin-top: 4px;">
+          <el-text v-if="!debugConfig.aiProvider" type="info" size="small" style="margin-top: 4px; display: block;">
             请先选择AI提供商
+          </el-text>
+          <el-text v-else-if="availableModels.length === 0" type="warning" size="small" style="margin-top: 4px; display: block;">
+            当前提供商没有支持 {{ debugConfig.type || 'text' }} 类型的模型
+          </el-text>
+          <el-text v-else-if="debugConfig.type && debugConfig.type !== 'text'" type="info" size="small" style="margin-top: 4px; display: block;">
+            仅显示支持 {{ debugConfig.type }} 类型的模型
           </el-text>
         </el-form-item>
 
@@ -297,8 +303,10 @@ import PromptMarkdownPreview from '@/components/PromptMarkdownPreview.vue'
 import { 
   getDefaultModel, 
   isValidModelForProvider,
-  getDebugSupportedProviders,
-  getDebugSupportedModelsByProvider
+  getModelsByProvider,
+  getModelsByProviderAndType,
+  isModelSupportType,
+  AI_PROVIDER_OPTIONS
 } from '@/config/ai'
 import { FORMAT_TYPE_OPTIONS, PROMPT_TYPE_OPTIONS } from '@/models/prompt'
 
@@ -372,8 +380,8 @@ export default {
     // 自定义参数列表
     const customParameters = ref([])
 
-    // AI提供商选项（仅支持调试的提供商）
-    const aiProviderOptions = getDebugSupportedProviders()
+    // AI提供商选项（使用所有提供商）
+    const aiProviderOptions = AI_PROVIDER_OPTIONS
     
     // 格式化类型选项
     const formatTypeOptions = FORMAT_TYPE_OPTIONS
@@ -388,10 +396,11 @@ export default {
              debugConfig.value.type === 'video'
     })
 
-    // 根据当前提供商获取可用的模型（仅支持调试的模型）
+    // 根据当前提供商和类型获取可用的模型
     const availableModels = computed(() => {
       const provider = debugConfig.value.aiProvider
-      return getDebugSupportedModelsByProvider(provider)
+      const type = debugConfig.value.type || 'text'
+      return getModelsByProviderAndType(provider, type)
     })
 
     // 提供商改变时的处理
@@ -399,8 +408,9 @@ export default {
       // 清空当前选择的模型
       debugConfig.value.model = ''
       
-      // 如果新提供商有可用模型，自动选择第一个
-      const supportedModels = getDebugSupportedModelsByProvider(newProvider)
+      // 如果新提供商有可用模型，自动选择第一个支持当前类型的模型
+      const type = debugConfig.value.type || 'text'
+      const supportedModels = getModelsByProviderAndType(newProvider, type)
       if (supportedModels.length > 0) {
         debugConfig.value.model = supportedModels[0].value
       }
@@ -855,6 +865,24 @@ export default {
         }
       })
     }, { immediate: true })
+
+    // 监听 prompt 类型变化，检查当前模型是否支持
+    watch(() => debugConfig.value.type, (newType) => {
+      if (debugConfig.value.model && debugConfig.value.aiProvider) {
+        // 检查当前模型是否支持新类型
+        if (!isModelSupportType(debugConfig.value.model, debugConfig.value.aiProvider, newType)) {
+          // 如果不支持，尝试选择一个支持该类型的模型
+          const supportedModels = getModelsByProviderAndType(debugConfig.value.aiProvider, newType)
+          if (supportedModels.length > 0) {
+            debugConfig.value.model = supportedModels[0].value
+            ElMessage.warning(`当前模型不支持 ${newType} 类型，已自动切换到 ${supportedModels[0].label}`)
+          } else {
+            ElMessage.warning(`当前提供商没有支持 ${newType} 类型的模型`)
+            debugConfig.value.model = ''
+          }
+        }
+      }
+    })
 
 
 

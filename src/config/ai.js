@@ -13,20 +13,20 @@ export const AI_PROVIDER_OPTIONS = [
 // 各提供商对应的模型选项
 export const MODEL_OPTIONS = {
   openai: [
-    { label: 'GPT-4o', value: 'gpt-4o' },
-    { label: 'GPT-5', value: 'gpt-5' },
-    { label: 'GPT-4', value: 'gpt-4' },
-    { label: 'GPT-5-mini', value: 'gpt-5-mini' }
+    { label: 'GPT-4o', value: 'gpt-4o', supportedTypes: ['text'] },
+    { label: 'GPT-5', value: 'gpt-5', supportedTypes: ['text'] },
+    { label: 'GPT-4', value: 'gpt-4', supportedTypes: ['text'] },
+    { label: 'GPT-5-mini', value: 'gpt-5-mini', supportedTypes: ['text'] }
   ],
   dashscope: [
-    { label: 'qwen-plus', value: 'qwen-plus' },
-    { label: 'qwen-vl-plus-latest', value: 'qwen-vl-plus-latest' },
-    { label: 'qwen-vl-max-latest', value: 'qwen-vl-max-latest' },
-    { label: 'qwen-omni-turbo-latest', value: 'qwen-omni-turbo-latest' }
+    { label: 'qwen-plus', value: 'qwen-plus', supportedTypes: ['text'] },
+    { label: 'qwen-vl-plus-latest', value: 'qwen-vl-plus-latest', supportedTypes: ['text', 'image', 'video'] },
+    { label: 'qwen-vl-max-latest', value: 'qwen-vl-max-latest', supportedTypes: ['text', 'image', 'video'] },
+    { label: 'qwen-omni-turbo-latest', value: 'qwen-omni-turbo-latest', supportedTypes: ['text', 'image', 'audio', 'video'] }
   ],
   deepseek: [
-    { label: 'deepseek-chat', value: 'deepseek-chat' },
-    { label: 'deepseek-coder', value: 'deepseek-coder' }
+    { label: 'deepseek-chat', value: 'deepseek-chat', supportedTypes: ['text'] },
+    { label: 'deepseek-coder', value: 'deepseek-coder', supportedTypes: ['text'] }
   ]
 }
 
@@ -53,24 +53,6 @@ export const DEBUG_SUPPORTED_MODELS = {
   ]
 }
 
-// 获取指定提供商支持调试的模型选项
-export const getDebugSupportedModelsByProvider = (provider) => {
-  return DEBUG_SUPPORTED_MODELS[provider] || []
-}
-
-// 获取支持调试的提供商选项
-export const getDebugSupportedProviders = () => {
-  return AI_PROVIDER_OPTIONS.filter(provider => 
-    DEBUG_SUPPORTED_MODELS[provider] && DEBUG_SUPPORTED_MODELS[provider].length > 0
-  )
-}
-
-// 检查模型是否支持调试
-export const isModelSupportedForDebug = (model, provider) => {
-  const supportedModels = getDebugSupportedModelsByProvider(provider)
-  return supportedModels.some(m => m.value === model)
-}
-
 // 验证模型是否属于指定提供商
 export const isValidModelForProvider = (model, provider) => {
   const models = getModelsByProvider(provider)
@@ -93,4 +75,32 @@ export const getModelLabel = (model, provider) => {
   const models = getModelsByProvider(provider)
   const modelOption = models.find(m => m.value === model)
   return modelOption ? modelOption.label : model
+}
+
+// 检查模型是否支持指定的 prompt 类型
+export const isModelSupportType = (model, provider, type) => {
+  const models = getModelsByProvider(provider)
+  const modelOption = models.find(m => m.value === model)
+  if (!modelOption || !modelOption.supportedTypes) {
+    return false
+  }
+  return modelOption.supportedTypes.includes(type)
+}
+
+// 根据 prompt 类型过滤可用的模型
+export const getModelsByProviderAndType = (provider, type) => {
+  const models = getModelsByProvider(provider)
+  if (!type || type === 'text') {
+    // 如果没有指定类型或类型是 text，返回所有模型
+    return models
+  }
+  // 过滤出支持该类型的模型
+  return models.filter(m => m.supportedTypes && m.supportedTypes.includes(type))
+}
+
+// 获取模型支持的类型列表
+export const getModelSupportedTypes = (model, provider) => {
+  const models = getModelsByProvider(provider)
+  const modelOption = models.find(m => m.value === model)
+  return modelOption?.supportedTypes || ['text']
 }
