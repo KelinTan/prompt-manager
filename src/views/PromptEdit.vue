@@ -159,10 +159,10 @@
                 请先选择AI提供商
               </el-text>
               <el-text v-else-if="availableModels.length === 0" type="warning" size="small" style="margin-top: 4px; display: block;">
-                当前提供商没有支持 {{ form.type || 'text' }} 类型的模型
+                当前提供商没有支持 {{ form.type || 'text' }} 输入 → {{ form.return_type || 'text' }} 输出的模型
               </el-text>
-              <el-text v-else-if="form.type && form.type !== 'text'" type="info" size="small" style="margin-top: 4px; display: block;">
-                仅显示支持 {{ form.type }} 类型的模型
+              <el-text v-else-if="(form.type && form.type !== 'text') || (form.return_type && form.return_type !== 'text')" type="info" size="small" style="margin-top: 4px; display: block;">
+                仅显示支持 {{ form.type || 'text' }} 输入 → {{ form.return_type || 'text' }} 输出的模型
               </el-text>
             </el-form-item>
           </el-col>
@@ -240,7 +240,13 @@ import { ElMessage, ElMessageBox } from 'element-plus'
 import { ChatDotRound } from '@element-plus/icons-vue'
 import { promptApi } from '@/api/prompt'
 import { Prompt, FORMAT_TYPE_OPTIONS, RETURN_TYPE_OPTIONS, PROMPT_TYPE_OPTIONS } from '@/models/prompt'
-import { AI_PROVIDER_OPTIONS, getModelsByProvider, getDefaultModel, getModelsByProviderAndType, isModelSupportType } from '@/config/ai'
+import { 
+  AI_PROVIDER_OPTIONS, 
+  getModelsByProvider, 
+  getDefaultModel, 
+  getModelsByProviderAndTypes,
+  isModelSupportTypes 
+} from '@/config/ai'
 import PromptMarkdownPreview from '@/components/PromptMarkdownPreview.vue'
 
 
@@ -286,34 +292,52 @@ export default {
     const returnTypeOptions = RETURN_TYPE_OPTIONS
     const typeOptions = PROMPT_TYPE_OPTIONS
 
-    // 计算可用模型（根据 prompt 类型过滤）
+    // 计算可用模型（根据输入类型和返回类型过滤）
     const availableModels = computed(() => {
       if (!form.ai_provider) return []
-      return getModelsByProviderAndType(form.ai_provider, form.type)
+      return getModelsByProviderAndTypes(form.ai_provider, form.type, form.return_type)
     })
 
     // 监听AI供应商变化，自动更新模型
     watch(() => form.ai_provider, (newProvider) => {
       if (newProvider) {
-        const models = getModelsByProviderAndType(newProvider, form.type)
+        const models = getModelsByProviderAndTypes(newProvider, form.type, form.return_type)
         if (models.length > 0 && !models.find(m => m.value === form.model)) {
           form.model = models[0]?.value || getDefaultModel(newProvider)
         }
       }
     })
 
-    // 监听 prompt 类型变化，检查当前模型是否支持
+    // 监听输入类型变化，检查当前模型是否支持
     watch(() => form.type, (newType) => {
       if (form.model && form.ai_provider) {
-        // 检查当前模型是否支持新类型
-        if (!isModelSupportType(form.model, form.ai_provider, newType)) {
-          // 如果不支持，尝试选择一个支持该类型的模型
-          const supportedModels = getModelsByProviderAndType(form.ai_provider, newType)
+        // 检查当前模型是否支持新的输入类型和返回类型组合
+        if (!isModelSupportTypes(form.model, form.ai_provider, newType, form.return_type)) {
+          // 如果不支持，尝试选择一个支持该组合的模型
+          const supportedModels = getModelsByProviderAndTypes(form.ai_provider, newType, form.return_type)
           if (supportedModels.length > 0) {
             form.model = supportedModels[0].value
-            ElMessage.warning(`当前模型不支持 ${newType} 类型，已自动切换到 ${supportedModels[0].label}`)
+            ElMessage.warning(`当前模型不支持该输入输出组合，已自动切换到 ${supportedModels[0].label}`)
           } else {
-            ElMessage.warning(`当前提供商没有支持 ${newType} 类型的模型`)
+            ElMessage.warning(`当前提供商没有支持该输入输出组合的模型`)
+            form.model = ''
+          }
+        }
+      }
+    })
+
+    // 监听返回类型变化，检查当前模型是否支持
+    watch(() => form.return_type, (newReturnType) => {
+      if (form.model && form.ai_provider) {
+        // 检查当前模型是否支持新的输入类型和返回类型组合
+        if (!isModelSupportTypes(form.model, form.ai_provider, form.type, newReturnType)) {
+          // 如果不支持，尝试选择一个支持该组合的模型
+          const supportedModels = getModelsByProviderAndTypes(form.ai_provider, form.type, newReturnType)
+          if (supportedModels.length > 0) {
+            form.model = supportedModels[0].value
+            ElMessage.warning(`当前模型不支持该输入输出组合，已自动切换到 ${supportedModels[0].label}`)
+          } else {
+            ElMessage.warning(`当前提供商没有支持该输入输出组合的模型`)
             form.model = ''
           }
         }
@@ -522,6 +546,7 @@ export default {
         template: form.template,
         formatType: form.format_type,
         type: form.type,
+        returnType: form.return_type,
         urls: form.urls || [],
         timestamp: Date.now()
       }

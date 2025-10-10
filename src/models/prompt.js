@@ -68,8 +68,11 @@ export const FORMAT_TYPE_OPTIONS = [
 
 // 返回类型选项
 export const RETURN_TYPE_OPTIONS = [
+  { label: 'Text', value: 'text' },
   { label: 'JSON', value: 'json_object' },
-  { label: 'Text', value: 'text' }
+  { label: 'Image', value: 'image' },
+  { label: 'Audio', value: 'audio' },
+  { label: 'Video', value: 'video' }
 ]
 
 // Prompt类型选项

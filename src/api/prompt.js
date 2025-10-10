@@ -155,5 +155,14 @@ export const promptApi = {
         reject(error)
       })
     })
+  },
+
+  // 调试prompt - 媒体生成接口（用于图片、音频、视频）
+  async debugPromptMedia(data) {
+    // 媒体生成可能需要较长时间，设置50秒超时
+    const response = await api.post('/prompts/synthesis/media', data, {
+      timeout: 50000 // 50秒
+    })
+    return response.data
   }
 }

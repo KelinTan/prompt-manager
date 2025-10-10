@@ -37,10 +37,10 @@
             请先选择AI提供商
           </el-text>
           <el-text v-else-if="availableModels.length === 0" type="warning" size="small" style="margin-top: 4px; display: block;">
-            当前提供商没有支持 {{ debugConfig.type || 'text' }} 类型的模型
+            当前提供商没有支持 {{ debugConfig.type || 'text' }} 输入 → {{ debugConfig.returnType || 'text' }} 输出的模型
           </el-text>
-          <el-text v-else-if="debugConfig.type && debugConfig.type !== 'text'" type="info" size="small" style="margin-top: 4px; display: block;">
-            仅显示支持 {{ debugConfig.type }} 类型的模型
+          <el-text v-else-if="(debugConfig.type && debugConfig.type !== 'text') || (debugConfig.returnType && debugConfig.returnType !== 'text')" type="info" size="small" style="margin-top: 4px; display: block;">
+            仅显示支持 {{ debugConfig.type || 'text' }} 输入 → {{ debugConfig.returnType || 'text' }} 输出的模型
           </el-text>
         </el-form-item>
 
@@ -76,7 +76,25 @@
             />
           </el-select>
           <el-text type="info" size="small" style="margin-top: 4px;">
-            选择Prompt的类型（文本、图片、音频、视频等）
+            选择Prompt的输入类型（文本、图片、音频、视频等）
+          </el-text>
+        </el-form-item>
+
+        <el-form-item label="返回类型">
+          <el-select 
+            v-model="debugConfig.returnType" 
+            placeholder="选择返回类型" 
+            style="width: 100%"
+          >
+            <el-option 
+              v-for="returnTypeOption in returnTypeOptions" 
+              :key="returnTypeOption.value" 
+              :label="returnTypeOption.label" 
+              :value="returnTypeOption.value" 
+            />
+          </el-select>
+          <el-text type="info" size="small" style="margin-top: 4px;">
+            选择期望的输出类型（文本、JSON、图片、音频、视频等）
           </el-text>
         </el-form-item>
 
@@ -273,11 +291,61 @@
         </div>
       </div>
       
-      <div class="streaming-text">
+      <!-- 文本/JSON结果显示 -->
+      <div v-if="!isMediaOutput" class="streaming-text">
         <div style="font-family: monospace; white-space: pre-wrap; padding: 12px; background: #f8f9fa; border: 1px solid #e9ecef; border-radius: 6px; min-height: 100px; line-height: 1.5;">
           <span v-if="useCharByChar">{{ currentVisibleText }}</span>
           <span v-else>{{ streamBuffer }}</span>
           <span v-if="isDebugging" class="cursor">|</span>
+        </div>
+      </div>
+
+      <!-- 媒体结果显示 -->
+      <div v-else class="media-result-container">
+        <!-- 图片结果 -->
+        <div v-if="debugConfig.returnType === 'image' && mediaUrls.length > 0" class="media-gallery">
+          <div class="media-grid">
+            <div v-for="(url, index) in mediaUrls" :key="index" class="media-item">
+              <img :src="url" :alt="`生成的图片 ${index + 1}`" class="media-image" />
+              <div class="media-actions">
+                <el-button size="small" @click="openMediaUrl(url)">查看原图</el-button>
+                <el-button size="small" @click="copyToClipboard(url)">复制链接</el-button>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- 音频结果 -->
+        <div v-if="debugConfig.returnType === 'audio' && mediaUrls.length > 0" class="media-list">
+          <div v-for="(url, index) in mediaUrls" :key="index" class="media-item">
+            <div class="media-label">音频 {{ index + 1 }}</div>
+            <audio :src="url" controls class="media-audio"></audio>
+            <div class="media-actions">
+              <el-button size="small" @click="openMediaUrl(url)">下载</el-button>
+              <el-button size="small" @click="copyToClipboard(url)">复制链接</el-button>
+            </div>
+          </div>
+        </div>
+
+        <!-- 视频结果 -->
+        <div v-if="debugConfig.returnType === 'video' && mediaUrls.length > 0" class="media-list">
+          <div v-for="(url, index) in mediaUrls" :key="index" class="media-item">
+            <div class="media-label">视频 {{ index + 1 }}</div>
+            <video :src="url" controls class="media-video"></video>
+            <div class="media-actions">
+              <el-button size="small" @click="openMediaUrl(url)">下载</el-button>
+              <el-button size="small" @click="copyToClipboard(url)">复制链接</el-button>
+            </div>
+          </div>
+        </div>
+
+        <!-- 加载中状态 -->
+        <div v-if="isDebugging && mediaUrls.length === 0" class="media-loading">
+          <el-icon class="is-loading" style="font-size: 32px; color: #409eff;">
+            <Loading />
+          </el-icon>
+          <div style="margin-top: 12px; color: #606266; font-size: 16px;">正在生成{{ debugConfig.returnType }}...</div>
+          <div style="margin-top: 8px; color: #909399; font-size: 14px;">已用时: {{ elapsedTime }}s</div>
         </div>
       </div>
     </div>
@@ -304,11 +372,12 @@ import {
   getDefaultModel, 
   isValidModelForProvider,
   getModelsByProvider,
-  getModelsByProviderAndType,
-  isModelSupportType,
+  getModelsByProviderAndTypes,
+  isModelSupportTypes,
+  isModelSupportInputType,
   AI_PROVIDER_OPTIONS
 } from '@/config/ai'
-import { FORMAT_TYPE_OPTIONS, PROMPT_TYPE_OPTIONS } from '@/models/prompt'
+import { FORMAT_TYPE_OPTIONS, PROMPT_TYPE_OPTIONS, RETURN_TYPE_OPTIONS } from '@/models/prompt'
 
 export default {
   name: 'PromptDebugger',
@@ -338,6 +407,10 @@ export default {
       type: String,
       default: 'text'
     },
+    returnType: {
+      type: String,
+      default: 'text'
+    },
     urls: {
       type: Array,
       default: () => []
@@ -354,6 +427,9 @@ export default {
     const debugError = ref('')
     const debugDuration = ref(0)
     const streamBuffer = ref('')
+    const mediaUrls = ref([]) // 存储媒体URL结果（图片、音频、视频）
+    const elapsedTime = ref(0) // 已经过的时间（秒）
+    const timerInterval = ref(null) // 计时器
 
     const debugStartTime = ref(0)
     const useCharByChar = ref(false) // 是否使用逐字符显示模式
@@ -371,6 +447,7 @@ export default {
       template: props.template || '',
       formatType: props.formatType || 'square_brackets',
       type: props.type || 'text',
+      returnType: props.returnType || 'text',
       urls: props.urls || [],
       variables: {},
     //   temperature: 0.7,
@@ -389,6 +466,9 @@ export default {
     // Prompt类型选项
     const promptTypeOptions = PROMPT_TYPE_OPTIONS
     
+    // 返回类型选项
+    const returnTypeOptions = RETURN_TYPE_OPTIONS
+    
     // 判断当前类型是否需要 URLs
     const needsUrls = computed(() => {
       return debugConfig.value.type === 'image' || 
@@ -396,11 +476,19 @@ export default {
              debugConfig.value.type === 'video'
     })
 
-    // 根据当前提供商和类型获取可用的模型
+    // 判断返回类型是否是媒体类型（需要使用媒体接口）
+    const isMediaOutput = computed(() => {
+      return debugConfig.value.returnType === 'image' || 
+             debugConfig.value.returnType === 'audio' || 
+             debugConfig.value.returnType === 'video'
+    })
+
+    // 根据当前提供商、输入类型和返回类型获取可用的模型
     const availableModels = computed(() => {
       const provider = debugConfig.value.aiProvider
       const type = debugConfig.value.type || 'text'
-      return getModelsByProviderAndType(provider, type)
+      const returnType = debugConfig.value.returnType || 'text'
+      return getModelsByProviderAndTypes(provider, type, returnType)
     })
 
     // 提供商改变时的处理
@@ -408,9 +496,10 @@ export default {
       // 清空当前选择的模型
       debugConfig.value.model = ''
       
-      // 如果新提供商有可用模型，自动选择第一个支持当前类型的模型
+      // 如果新提供商有可用模型，自动选择第一个支持当前类型组合的模型
       const type = debugConfig.value.type || 'text'
-      const supportedModels = getModelsByProviderAndType(newProvider, type)
+      const returnType = debugConfig.value.returnType || 'text'
+      const supportedModels = getModelsByProviderAndTypes(newProvider, type, returnType)
       if (supportedModels.length > 0) {
         debugConfig.value.model = supportedModels[0].value
       }
@@ -661,13 +750,57 @@ export default {
       }
     }
 
+    // 复制到剪贴板（用于媒体URL）
+    const copyToClipboard = async (text) => {
+      try {
+        await navigator.clipboard.writeText(text)
+        ElMessage.success('链接已复制到剪贴板')
+      } catch (error) {
+        // 降级处理
+        const textArea = document.createElement('textarea')
+        textArea.value = text
+        document.body.appendChild(textArea)
+        textArea.select()
+        document.execCommand('copy')
+        document.body.removeChild(textArea)
+        ElMessage.success('链接已复制到剪贴板')
+      }
+    }
+
+    // 在新标签页打开媒体URL
+    const openMediaUrl = (url) => {
+      window.open(url, '_blank')
+    }
+
+    // 启动计时器
+    const startTimer = () => {
+      elapsedTime.value = 0
+      if (timerInterval.value) {
+        clearInterval(timerInterval.value)
+      }
+      timerInterval.value = setInterval(() => {
+        elapsedTime.value++
+      }, 1000)
+    }
+
+    // 停止计时器
+    const stopTimer = () => {
+      if (timerInterval.value) {
+        clearInterval(timerInterval.value)
+        timerInterval.value = null
+      }
+    }
+
     // 清空结果
     const clearResult = () => {
       debugResult.value = ''
       debugError.value = ''
       streamBuffer.value = ''
+      mediaUrls.value = []
       debugDuration.value = 0
       isDebugging.value = false
+      elapsedTime.value = 0
+      stopTimer()
       
       // 重置逐字符显示状态
       useCharByChar.value = false
@@ -684,10 +817,14 @@ export default {
       debugResult.value = ''
       debugError.value = ''
       streamBuffer.value = ''
+      mediaUrls.value = []
       debugStartTime.value = Date.now()
       
-      // 立即启用逐字符显示模式
-      useCharByChar.value = true
+      // 启动计时器
+      startTimer()
+      
+      // 立即启用逐字符显示模式（仅用于文本输出）
+      useCharByChar.value = !isMediaOutput.value
       fullText.value = ''
       visibleCharCount.value = 0
       totalCharCount.value = 0
@@ -696,50 +833,78 @@ export default {
         // 使用最终的prompt（已替换变量）
         const message = finalPrompt.value
         
-        await promptApi.debugPromptStream({
-          message: message,
-          model: debugConfig.value.model,
-          ai_provider: debugConfig.value.aiProvider,
-          type: debugConfig.value.type,
-          urls: debugConfig.value.urls,
-          temperature: debugConfig.value.temperature,
-          max_tokens: debugConfig.value.maxTokens
-        }, (chunk) => {
-          // 累积完整文本
-          fullText.value += chunk
-          totalCharCount.value = fullText.value.length
+        // 根据返回类型选择不同的API
+        if (isMediaOutput.value) {
+          // 媒体输出：使用 /synthesis/media 接口
+          const result = await promptApi.debugPromptMedia({
+            message: message,
+            model: debugConfig.value.model,
+            ai_provider: debugConfig.value.aiProvider,
+            type: debugConfig.value.type,
+            return_type: debugConfig.value.returnType,
+            urls: debugConfig.value.urls,
+            temperature: debugConfig.value.temperature,
+            max_tokens: debugConfig.value.maxTokens
+          })
           
-          // 逐字符显示新接收的内容
-          const newChars = chunk.split('')
-          let charIndex = 0
-          
-          const showNextChar = () => {
-            if (charIndex < newChars.length && visibleCharCount.value < totalCharCount.value) {
-              visibleCharCount.value++
-              charIndex++
-              
-              // 继续显示下一个字符
-              setTimeout(showNextChar, 30)
-            }
+          // 处理媒体结果
+          if (result && result.urls && Array.isArray(result.urls)) {
+            mediaUrls.value = result.urls
+            debugResult.value = `生成了 ${result.urls.length} 个${debugConfig.value.returnType}文件`
+          } else {
+            throw new Error('媒体生成结果格式错误')
           }
           
-          // 开始逐字显示
-          showNextChar()
-          
-          // 保持向后兼容
-          streamBuffer.value += chunk
-        })
+          debugDuration.value = Date.now() - debugStartTime.value
+          ElMessage.success('生成完成')
+        } else {
+          // 文本/JSON输出：使用流式接口
+          await promptApi.debugPromptStream({
+            message: message,
+            model: debugConfig.value.model,
+            ai_provider: debugConfig.value.aiProvider,
+            type: debugConfig.value.type,
+            urls: debugConfig.value.urls,
+            temperature: debugConfig.value.temperature,
+            max_tokens: debugConfig.value.maxTokens
+          }, (chunk) => {
+            // 累积完整文本
+            fullText.value += chunk
+            totalCharCount.value = fullText.value.length
+            
+            // 逐字符显示新接收的内容
+            const newChars = chunk.split('')
+            let charIndex = 0
+            
+            const showNextChar = () => {
+              if (charIndex < newChars.length && visibleCharCount.value < totalCharCount.value) {
+                visibleCharCount.value++
+                charIndex++
+                
+                // 继续显示下一个字符
+                setTimeout(showNextChar, 30)
+              }
+            }
+            
+            // 开始逐字显示
+            showNextChar()
+            
+            // 保持向后兼容
+            streamBuffer.value += chunk
+          })
 
-        // 流式调用完成
-        debugResult.value = fullText.value || streamBuffer.value
-        debugDuration.value = Date.now() - debugStartTime.value
-        
-        // 确保所有字符都显示完成
-        if (useCharByChar.value && visibleCharCount.value < totalCharCount.value) {
-          visibleCharCount.value = totalCharCount.value
+          // 流式调用完成
+          debugResult.value = fullText.value || streamBuffer.value
+          debugDuration.value = Date.now() - debugStartTime.value
+          
+          // 确保所有字符都显示完成
+          if (useCharByChar.value && visibleCharCount.value < totalCharCount.value) {
+            visibleCharCount.value = totalCharCount.value
+          }
+          
+          ElMessage.success('调试完成')
         }
         
-        ElMessage.success('调试完成')
         emit('debug-complete')
       } catch (error) {
         debugError.value = error.message || '调试失败，请检查网络连接和参数设置'
@@ -747,6 +912,7 @@ export default {
         emit('debug-complete')
       } finally {
         isDebugging.value = false
+        stopTimer()
       }
     }
 
@@ -789,12 +955,17 @@ export default {
           debugConfig.value.type = config.type
         }
         
+        // 加载返回类型
+        if (config.returnType) {
+          debugConfig.value.returnType = config.returnType
+        }
+        
         // 加载 URLs（如果有）
         if (config.urls && Array.isArray(config.urls)) {
           debugConfig.value.urls = config.urls
         }
         
-        // 验证模型是否适用于当前提供商
+        // 验证模型是否适用于当前提供商和类型组合
         if (config.model && isValidModelForProvider(config.model, provider)) {
           debugConfig.value.model = config.model
         } else {
@@ -823,12 +994,13 @@ export default {
     }, { immediate: true })
 
     // 监听props变化，同步到配置
-    watch(() => [props.model, props.aiProvider, props.template, props.formatType, props.type, props.urls], ([model, aiProvider, template, formatType, type, urls]) => {
+    watch(() => [props.model, props.aiProvider, props.template, props.formatType, props.type, props.returnType, props.urls], ([model, aiProvider, template, formatType, type, returnType, urls]) => {
       const provider = aiProvider || debugConfig.value.aiProvider
       debugConfig.value.aiProvider = provider
       debugConfig.value.template = template || debugConfig.value.template
       debugConfig.value.formatType = formatType || debugConfig.value.formatType
       debugConfig.value.type = type || debugConfig.value.type
+      debugConfig.value.returnType = returnType || debugConfig.value.returnType
       debugConfig.value.urls = urls || debugConfig.value.urls
       
       // 设置模型：优先使用props中的model，如果没有则使用该提供商的默认模型
@@ -866,18 +1038,38 @@ export default {
       })
     }, { immediate: true })
 
-    // 监听 prompt 类型变化，检查当前模型是否支持
+    // 监听输入类型变化，检查当前模型是否支持
     watch(() => debugConfig.value.type, (newType) => {
       if (debugConfig.value.model && debugConfig.value.aiProvider) {
-        // 检查当前模型是否支持新类型
-        if (!isModelSupportType(debugConfig.value.model, debugConfig.value.aiProvider, newType)) {
-          // 如果不支持，尝试选择一个支持该类型的模型
-          const supportedModels = getModelsByProviderAndType(debugConfig.value.aiProvider, newType)
+        const returnType = debugConfig.value.returnType || 'text'
+        // 检查当前模型是否支持新的输入输出组合
+        if (!isModelSupportTypes(debugConfig.value.model, debugConfig.value.aiProvider, newType, returnType)) {
+          // 如果不支持，尝试选择一个支持该组合的模型
+          const supportedModels = getModelsByProviderAndTypes(debugConfig.value.aiProvider, newType, returnType)
           if (supportedModels.length > 0) {
             debugConfig.value.model = supportedModels[0].value
-            ElMessage.warning(`当前模型不支持 ${newType} 类型，已自动切换到 ${supportedModels[0].label}`)
+            ElMessage.warning(`当前模型不支持该输入输出组合，已自动切换到 ${supportedModels[0].label}`)
           } else {
-            ElMessage.warning(`当前提供商没有支持 ${newType} 类型的模型`)
+            ElMessage.warning(`当前提供商没有支持该输入输出组合的模型`)
+            debugConfig.value.model = ''
+          }
+        }
+      }
+    })
+
+    // 监听返回类型变化，检查当前模型是否支持
+    watch(() => debugConfig.value.returnType, (newReturnType) => {
+      if (debugConfig.value.model && debugConfig.value.aiProvider) {
+        const type = debugConfig.value.type || 'text'
+        // 检查当前模型是否支持新的输入输出组合
+        if (!isModelSupportTypes(debugConfig.value.model, debugConfig.value.aiProvider, type, newReturnType)) {
+          // 如果不支持，尝试选择一个支持该组合的模型
+          const supportedModels = getModelsByProviderAndTypes(debugConfig.value.aiProvider, type, newReturnType)
+          if (supportedModels.length > 0) {
+            debugConfig.value.model = supportedModels[0].value
+            ElMessage.warning(`当前模型不支持该输入输出组合，已自动切换到 ${supportedModels[0].label}`)
+          } else {
+            ElMessage.warning(`当前提供商没有支持该输入输出组合的模型`)
             debugConfig.value.model = ''
           }
         }
@@ -894,6 +1086,8 @@ export default {
       debugError,
       debugDuration,
       streamBuffer,
+      mediaUrls,
+      elapsedTime,
       useCharByChar,
       visibleCharCount,
       totalCharCount,
@@ -906,7 +1100,9 @@ export default {
       aiProviderOptions,
       formatTypeOptions,
       promptTypeOptions,
+      returnTypeOptions,
       needsUrls,
+      isMediaOutput,
       availableModels,
       customParameters,
       onProviderChange,
@@ -920,6 +1116,8 @@ export default {
       backToConfig,
       loadExternalConfig,
       copyResult,
+      copyToClipboard,
+      openMediaUrl,
       clearResult,
       addCustomParameter,
       removeCustomParameter,
@@ -978,6 +1176,7 @@ export default {
   min-height: 60px;
   max-height: 400px;
   overflow-y: auto;
+  overflow-x: hidden;
 }
 
 .streaming-text pre {
@@ -1128,5 +1327,116 @@ export default {
   background: #f9f9f9;
   border-radius: 4px;
   border: 1px dashed #dcdfe6;
+}
+
+/* 媒体结果容器 */
+.media-result-container {
+  width: 100%;
+  max-width: 100%;
+  overflow: hidden;
+  box-sizing: border-box;
+}
+
+/* 媒体结果显示样式 */
+.media-gallery {
+  padding: 16px;
+  background: #ffffff;
+  border-radius: 8px;
+  min-height: 200px;
+  display: flex;
+  justify-content: center;
+  align-items: flex-start;
+  width: 100%;
+  box-sizing: border-box;
+  overflow: hidden;
+}
+
+.media-grid {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  align-items: center;
+  max-width: 800px;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+.media-item {
+  border: 1px solid #e4e7ed;
+  border-radius: 8px;
+  overflow: hidden;
+  background: #fff;
+  width: 100%;
+  max-width: 100%;
+  display: flex;
+  flex-direction: column;
+  box-sizing: border-box;
+}
+
+.media-image {
+  width: 100%;
+  height: auto;
+  display: block;
+  object-fit: contain;
+  max-height: 500px;
+  background: #f8f9fa;
+  box-sizing: border-box;
+}
+
+.media-audio,
+.media-video {
+  width: 100%;
+  display: block;
+  background: #000;
+}
+
+.media-video {
+  max-height: 400px;
+}
+
+.media-label {
+  padding: 8px 12px;
+  background: #f5f7fa;
+  font-weight: 500;
+  color: #606266;
+  border-bottom: 1px solid #e4e7ed;
+}
+
+.media-actions {
+  padding: 12px 16px;
+  display: flex;
+  gap: 8px;
+  justify-content: center;
+  background: #fafafa;
+  border-top: 1px solid #e4e7ed;
+  width: 100%;
+  box-sizing: border-box;
+  flex-shrink: 0;
+}
+
+.media-list {
+  padding: 16px;
+  background: #ffffff;
+  border-radius: 8px;
+  min-height: 200px;
+}
+
+.media-list .media-item {
+  margin-bottom: 16px;
+}
+
+.media-list .media-item:last-child {
+  margin-bottom: 0;
+}
+
+.media-loading {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 60px 20px;
+  background: #f8f9fa;
+  border-radius: 8px;
+  min-height: 200px;
 }
 </style>
