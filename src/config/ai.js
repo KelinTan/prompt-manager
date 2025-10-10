@@ -20,6 +20,7 @@ export const MODEL_OPTIONS = {
   ],
   dashscope: [
     { label: 'qwen-plus', value: 'qwen-plus', supportedTypes: ['text'] },
+    { label: 'qwen3-vl-plus', value: 'qwen3-vl-plus', supportedTypes: ['text', 'image', 'video']},
     { label: 'qwen-vl-plus-latest', value: 'qwen-vl-plus-latest', supportedTypes: ['text', 'image', 'video'] },
     { label: 'qwen-vl-max-latest', value: 'qwen-vl-max-latest', supportedTypes: ['text', 'image', 'video'] },
     { label: 'qwen-omni-turbo-latest', value: 'qwen-omni-turbo-latest', supportedTypes: ['text', 'image', 'audio', 'video'] }
