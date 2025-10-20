@@ -88,8 +88,8 @@ export const MODEL_OPTIONS = {
       }
     },
     { 
-      label: 'qwen-omni-turbo-latest', 
-      value: 'qwen-omni-turbo-latest', 
+      label: 'qwen3-omni-flash', 
+      value: 'qwen3-omni-flash', 
       capabilities: {
         inputTypes: ['text', 'image', 'audio', 'video'],
         returnTypes: ['text', 'json_object']
