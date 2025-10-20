@@ -11,7 +11,8 @@
         >
           保存
         </el-button>
-        <el-button 
+        <el-button
+          v-if="isEdit"
           type="warning" 
           @click="handleSaveAndPublish"
           :loading="saving || publishing"
