@@ -38,6 +38,18 @@ export const promptApi = {
     return response.data
   },
 
+  // 启用prompt
+  async enablePrompt(id) {
+    const response = await api.post(`/prompts/${id}/enable`)
+    return response.data
+  },
+
+  // 禁用prompt
+  async disablePrompt(id) {
+    const response = await api.post(`/prompts/${id}/disable`)
+    return response.data
+  },
+
   // 获取prompt历史版本
   async getPromptHistory(id, params = {}) {
     const response = await api.get(`/prompts/${id}/history`, { params })

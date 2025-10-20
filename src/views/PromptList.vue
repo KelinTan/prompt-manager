@@ -100,25 +100,23 @@
                 >
                   {{ getVersionLabel(prompt) }}
                 </span>
+                <span class="meta-divider">•</span>
+                <span 
+                  class="enabled-indicator"
+                  :class="{ 'is-enabled': prompt.enabled, 'is-disabled': !prompt.enabled }"
+                >
+                  {{ prompt.enabled ? '已启用' : '已禁用' }}
+                </span>
               </div>
             </div>
             <div class="card-status">
-              <div class="status-tags">
-                <el-tag 
-                  :type="getStatusInfo(prompt.status).type" 
-                  size="small"
-                  class="status-tag"
-                >
-                  {{ getStatusInfo(prompt.status).label }}
-                </el-tag>
-                <el-tag 
-                  :type="prompt.mock ? 'success' : 'warning'" 
-                  size="small"
-                  class="mode-tag"
-                >
-                  {{ prompt.mock ? 'Mock' : 'Live' }}
-                </el-tag>
-              </div>
+              <el-tag 
+                :type="getStatusInfo(prompt.status).type" 
+                size="small"
+                class="status-tag"
+              >
+                {{ getStatusInfo(prompt.status).label }}
+              </el-tag>
             </div>
           </div>
           
@@ -181,6 +179,19 @@
               >
                 <el-icon><Clock /></el-icon>
               </el-button>
+              <el-tooltip :content="prompt.enabled ? '禁用' : '启用'" placement="top">
+                <el-button 
+                  size="small" 
+                  :type="prompt.enabled ? 'warning' : 'success'"
+                  link
+                  @click="handleToggleEnabled(prompt)"
+                  :loading="togglingIds.has(prompt.id)"
+                >
+                  <el-icon>
+                    <component :is="prompt.enabled ? 'CircleClose' : 'CircleCheck'" />
+                  </el-icon>
+                </el-button>
+              </el-tooltip>
               <el-popconfirm
                 title="确定要删除这个Prompt吗？"
                 @confirm="handleDelete(prompt)"
@@ -235,6 +246,7 @@ export default {
     const loading = ref(false)
     const prompts = ref([])
     const publishingIds = ref(new Set())
+    const togglingIds = ref(new Set())
 
     // 从 sessionStorage 恢复搜索条件
     const savedSearchState = sessionStorage.getItem(SEARCH_STORAGE_KEY)
@@ -404,6 +416,38 @@ export default {
       }
     }
 
+    // 切换启用/禁用状态
+    const handleToggleEnabled = async (row) => {
+      const action = row.enabled ? '禁用' : '启用'
+      try {
+        await ElMessageBox.confirm(
+          `确定要${action}Prompt "${row.title || row.name}" 吗？`,
+          `确认${action}`,
+          {
+            confirmButtonText: '确定',
+            cancelButtonText: '取消',
+            type: 'warning'
+          }
+        )
+
+        togglingIds.value.add(row.id)
+        // 根据当前状态调用不同的接口
+        if (row.enabled) {
+          await promptApi.disablePrompt(row.id)
+        } else {
+          await promptApi.enablePrompt(row.id)
+        }
+        ElMessage.success(`${action}成功`)
+        loadData() // 重新加载数据
+      } catch (error) {
+        if (error !== 'cancel') {
+          ElMessage.error(`${action}失败: ` + error.message)
+        }
+      } finally {
+        togglingIds.value.delete(row.id)
+      }
+    }
+
     // 监听搜索条件变化，保存到 sessionStorage
     watch(searchForm, (newVal) => {
       sessionStorage.setItem(SEARCH_STORAGE_KEY, JSON.stringify(newVal))
@@ -431,6 +475,7 @@ export default {
       pagination,
 
       publishingIds,
+      togglingIds,
       aiProviderOptions,
       getFormatTypeLabel,
       getStatusInfo,
@@ -444,7 +489,8 @@ export default {
       handleEdit,
       handlePublish,
       handleHistory,
-      handleDelete
+      handleDelete,
+      handleToggleEnabled
     }
   }
 }
@@ -809,6 +855,7 @@ export default {
   display: flex;
   align-items: center;
   gap: var(--spacing-xs);
+  flex-wrap: wrap;
 }
 
 .prompt-type {
@@ -841,28 +888,55 @@ export default {
   border-color: rgba(99, 102, 241, 0.2);
 }
 
-.card-status {
-  flex-shrink: 0;
+.meta-divider {
+  font-size: 10px;
+  color: var(--text-muted);
+  opacity: 0.5;
 }
 
-.status-tags {
-  display: flex;
-  flex-direction: column;
-  gap: var(--spacing-xs);
-  align-items: flex-end;
+.mode-indicator {
+  font-size: 11px;
+  font-weight: 600;
+  padding: 2px 6px;
+  border-radius: var(--radius-sm);
+}
+
+.mode-indicator.mode-mock {
+  color: #10b981;
+  background: rgba(16, 185, 129, 0.1);
+}
+
+.mode-indicator.mode-live {
+  color: #f59e0b;
+  background: rgba(245, 158, 11, 0.1);
+}
+
+.enabled-indicator {
+  font-size: 11px;
+  font-weight: 600;
+  padding: 2px 6px;
+  border-radius: var(--radius-sm);
+}
+
+.enabled-indicator.is-enabled {
+  color: #10b981;
+  background: rgba(16, 185, 129, 0.1);
+}
+
+.enabled-indicator.is-disabled {
+  color: #6b7280;
+  background: rgba(107, 114, 128, 0.1);
+}
+
+.card-status {
+  flex-shrink: 0;
 }
 
 .status-tag {
   border-radius: var(--radius-sm);
   font-weight: 600;
-  font-size: 11px;
-}
-
-.mode-tag {
-  border-radius: var(--radius-sm);
-  font-weight: 500;
-  font-size: 10px;
-  opacity: 0.8;
+  font-size: 12px;
+  padding: 4px 10px;
 }
 
 .card-content {
