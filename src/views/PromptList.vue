@@ -44,6 +44,18 @@
                   :value="option.value"
                 />
               </el-select>
+              <el-select
+                v-model="searchForm.enabled"
+                placeholder="启用状态"
+                class="enabled-select"
+                size="large"
+                clearable
+                @change="handleSearch"
+                @clear="handleSearch"
+              >
+                <el-option label="已启用" :value="true" />
+                <el-option label="已禁用" :value="false" />
+              </el-select>
               <el-button 
                 size="large" 
                 @click="handleReset"
@@ -252,7 +264,8 @@ export default {
     const savedSearchState = sessionStorage.getItem(SEARCH_STORAGE_KEY)
     const initialSearchState = savedSearchState ? JSON.parse(savedSearchState) : {
       keyword: '',
-      ai_provider: ''
+      ai_provider: '',
+      enabled: undefined
     }
 
     // 从 sessionStorage 恢复分页状态
@@ -340,6 +353,7 @@ export default {
     const handleReset = () => {
       searchForm.keyword = ''
       searchForm.ai_provider = ''
+      searchForm.enabled = undefined
       pagination.page = 1
       // 清除存储的状态
       sessionStorage.removeItem(SEARCH_STORAGE_KEY)
@@ -596,6 +610,22 @@ export default {
 }
 
 .provider-select :deep(.el-input__wrapper:hover) {
+  box-shadow: 0 0 0 1px var(--primary-light) inset;
+}
+
+.enabled-select {
+  flex: 1;
+  min-width: 120px;
+}
+
+.enabled-select :deep(.el-input__wrapper) {
+  background: #f5f7fa;
+  box-shadow: 0 0 0 1px var(--border-color) inset;
+  border-radius: var(--radius-lg);
+  height: 40px;
+}
+
+.enabled-select :deep(.el-input__wrapper:hover) {
   box-shadow: 0 0 0 1px var(--primary-light) inset;
 }
 
