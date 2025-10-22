@@ -56,7 +56,13 @@
                 placeholder="请输入业务标识（如：user_profile_prompt）"
                 maxlength="255"
                 show-word-limit
+                :readonly="isEdit"
+                :class="{ 'readonly-input': isEdit }"
               />
+              <el-text v-if="isEdit" type="warning" size="small" style="margin-top: 4px; display: block;">
+                <el-icon><Lock /></el-icon>
+                业务标识不允许修改
+              </el-text>
             </el-form-item>
           </el-col>
         </el-row>
@@ -238,7 +244,7 @@
 import { ref, reactive, computed, watch, onMounted } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { ElMessage, ElMessageBox } from 'element-plus'
-import { ChatDotRound } from '@element-plus/icons-vue'
+import { ChatDotRound, Lock } from '@element-plus/icons-vue'
 import { promptApi } from '@/api/prompt'
 import { Prompt, FORMAT_TYPE_OPTIONS, RETURN_TYPE_OPTIONS, PROMPT_TYPE_OPTIONS } from '@/models/prompt'
 import { 
@@ -662,5 +668,22 @@ export default {
   display: flex;
   justify-content: flex-end;
   margin-bottom: 8px;
+}
+
+/* 只读输入框样式 */
+.readonly-input :deep(.el-input__wrapper) {
+  background-color: #f5f7fa;
+  cursor: not-allowed;
+  border: 1px solid #e4e7ed;
+}
+
+.readonly-input :deep(.el-input__inner) {
+  cursor: not-allowed;
+  color: #606266;
+  -webkit-text-fill-color: #606266;
+}
+
+.readonly-input :deep(.el-input__wrapper):hover {
+  box-shadow: 0 0 0 1px #e4e7ed inset;
 }
 </style>
