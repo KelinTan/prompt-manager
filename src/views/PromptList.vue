@@ -98,6 +98,7 @@
           v-for="prompt in prompts" 
           :key="prompt.id"
           class="prompt-card"
+          :class="{ 'disabled-card': !prompt.enabled }"
           @click="handleRowClick(prompt)"
         >
           <div class="card-header">
@@ -111,13 +112,6 @@
                   :class="{ 'draft-version': prompt.status === 'draft', 'published-version': prompt.status === 'published' }"
                 >
                   {{ getVersionLabel(prompt) }}
-                </span>
-                <span class="meta-divider">•</span>
-                <span 
-                  class="enabled-indicator"
-                  :class="{ 'is-enabled': prompt.enabled, 'is-disabled': !prompt.enabled }"
-                >
-                  {{ prompt.enabled ? '已启用' : '已禁用' }}
                 </span>
               </div>
             </div>
@@ -841,6 +835,53 @@ export default {
   transform: translateY(-4px);
   box-shadow: var(--shadow-xl);
   border-color: var(--primary-light);
+}
+
+/* 禁用状态的卡片样式 */
+.prompt-card.disabled-card {
+  background: linear-gradient(135deg, #f8f9fa 0%, #f0f1f3 100%);
+  opacity: 0.75;
+}
+
+.prompt-card.disabled-card::after {
+  content: '已禁用';
+  position: absolute;
+  top: 12px;
+  right: -30px;
+  background: linear-gradient(135deg, #9ca3af 0%, #6b7280 100%);
+  color: white;
+  padding: 4px 40px;
+  font-size: 11px;
+  font-weight: 600;
+  transform: rotate(45deg);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+  z-index: 10;
+  letter-spacing: 1px;
+}
+
+.prompt-card.disabled-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+  border-color: #9ca3af;
+}
+
+.prompt-card.disabled-card .card-title {
+  color: #6b7280;
+}
+
+.prompt-card.disabled-card .card-subtitle {
+  color: #9ca3af;
+  background: rgba(156, 163, 175, 0.1);
+}
+
+.prompt-card.disabled-card .template-preview {
+  color: #9ca3af;
+  background: #f3f4f6;
+}
+
+.prompt-card.disabled-card .prompt-type {
+  color: #9ca3af;
+  background: #e5e7eb;
 }
 
 .card-header {
