@@ -170,45 +170,31 @@
     <!-- 版本对比对话框 -->
     <el-dialog
       v-model="compareDialogVisible"
-      title="版本对比"
+      :title="`版本对比: ${compareVersion?.version} vs 当前版本 ${currentVersion}`"
       width="90%"
       top="5vh"
     >
       <div v-if="compareVersion" class="version-compare">
-        <el-row :gutter="20">
-          <el-col :span="12">
-            <div class="compare-section">
-              <h4>版本 {{ compareVersion.version }}</h4>
-              <el-card>
-                <div class="compare-content">
-                  <p><strong>模板:</strong></p>
-                  <el-input
-                    :model-value="compareVersion.template"
-                    type="textarea"
-                    :rows="8"
-                    readonly
-                  />
-                </div>
-              </el-card>
+        <div class="diff-section">
+          <h4>模板差异对比</h4>
+          <el-card>
+            <div class="diff-content">
+              <pre class="diff-display">
+                <span
+                  v-for="(part, index) in templateDiffs"
+                  :key="index"
+                  :class="{
+                    'diff-added': part.added,
+                    'diff-removed': part.removed,
+                    'diff-unchanged': !part.added && !part.removed
+                  }"
+                >
+                  {{ part.value }}
+                </span>
+              </pre>
             </div>
-          </el-col>
-          <el-col :span="12">
-            <div class="compare-section">
-              <h4>当前版本 {{ currentVersion }}</h4>
-              <el-card>
-                <div class="compare-content">
-                  <p><strong>模板:</strong></p>
-                  <el-input
-                    :model-value="currentVersionData?.template || ''"
-                    type="textarea"
-                    :rows="8"
-                    readonly
-                  />
-                </div>
-              </el-card>
-            </div>
-          </el-col>
-        </el-row>
+          </el-card>
+        </div>
       </div>
     </el-dialog>
   </div>
@@ -220,6 +206,7 @@ import { useRoute, useRouter } from 'vue-router'
 import { ElMessage, ElMessageBox } from 'element-plus'
 import { promptApi } from '@/api/prompt'
 import { FORMAT_TYPE_OPTIONS, PROMPT_STATUS_OPTIONS } from '@/models/prompt'
+import * as Diff from 'diff'
 
 export default {
   name: 'PromptHistory',
@@ -241,6 +228,7 @@ export default {
     const currentVersionData = ref(null)
     const rollbackingIds = ref(new Set())
     const currentPromptId = ref(null)
+    const templateDiffs = ref([])
 
     const promptId = route.params.id
 
@@ -326,6 +314,12 @@ export default {
       try {
         const versionData = await promptApi.getPrompt(version.id)
         compareVersion.value = versionData
+        
+        // 计算模板差异
+        const oldTemplate = versionData.template || ''
+        const newTemplate = currentVersionData.value?.template || ''
+        templateDiffs.value = Diff.diffLines(oldTemplate, newTemplate)
+        
         compareDialogVisible.value = true
       } catch (error) {
         ElMessage.error('加载版本数据失败: ' + error.message)
@@ -388,6 +382,7 @@ export default {
       currentVersionData,
       rollbackingIds,
       currentPromptId,
+      templateDiffs,
       getFormatTypeLabel,
       getStatusInfo,
       formatDate,
@@ -531,27 +526,54 @@ export default {
   margin-bottom: 10px;
 }
 
-.compare-section h4 {
+.diff-section {
+  margin-top: 0;
+}
+
+.diff-section h4 {
   color: #303133;
   margin-bottom: 10px;
-  text-align: center;
 }
 
-.compare-content p {
-  margin-bottom: 10px;
-  font-weight: 500;
+.diff-content {
+  max-height: 500px;
+  overflow-y: auto;
 }
 
-:deep(.el-timeline-item__timestamp) {
-  font-size: 12px;
-  color: #909399;
-}
-
-:deep(.el-descriptions__label) {
-  font-weight: 500;
-}
-
-:deep(.el-textarea__inner) {
+.diff-display {
   font-family: 'Monaco', 'Menlo', 'Ubuntu Mono', monospace;
+  font-size: 12px;
+  line-height: 1.4;
+  white-space: pre-wrap;
+  word-break: break-all;
+  margin: 0;
+  padding: 15px;
+  background-color: #f8f9fa;
+  border: 1px solid #e9ecef;
+  border-radius: 4px;
+}
+
+.diff-added {
+  background-color: #d4edda;
+  color: #155724;
+  border-left: 3px solid #28a745;
+  padding-left: 8px;
+  margin-left: -3px;
+  display: block;
+}
+
+.diff-removed {
+  background-color: #f8d7da;
+  color: #721c24;
+  border-left: 3px solid #dc3545;
+  padding-left: 8px;
+  margin-left: -3px;
+  text-decoration: line-through;
+  display: block;
+}
+
+.diff-unchanged {
+  color: #6c757d;
+  display: block;
 }
 </style>
