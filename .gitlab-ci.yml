@@ -79,7 +79,7 @@ deploy_beta:
 build_production:
   <<: *build_template
   variables:
-    BUILD_COMMAND: "build:production"
+    BUILD_COMMAND: "build:prod"
   only:
     - master
 
