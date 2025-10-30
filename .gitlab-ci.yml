@@ -36,7 +36,7 @@ variables:
   artifacts:
     paths:
       - $BUILD_DIR/
-    expire_in: 1 hour
+    expire_in: 1 week
   tags:
     - docker-ali
 
