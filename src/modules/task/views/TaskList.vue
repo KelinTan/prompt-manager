@@ -4,7 +4,7 @@
       <div class="header-container">
         <div class="header-left">
           <h1 class="page-title">任务列表</h1>
-          <p class="page-subtitle">管理和监控 AI 生成任务（共 {{ total }} 个）</p>
+          <p class="page-subtitle">管理和监控 AIGC 任务（共 {{ total }} 个）</p>
         </div>
         
         <div class="header-center">
