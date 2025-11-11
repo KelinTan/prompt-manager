@@ -1,4 +1,4 @@
-import api from '@/api/request'
+import api from '@/modules/common/api/request'
 import axios from 'axios'
 
 const BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:8080'

@@ -138,8 +138,8 @@
 import { ref, computed, onMounted } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { ElMessage, ElMessageBox } from 'element-plus'
-import { promptApi } from '@/api/prompt'
-import { FORMAT_TYPE_OPTIONS } from '@/models/prompt'
+import { promptApi } from '@/modules/prompt/api/prompt'
+import { FORMAT_TYPE_OPTIONS } from '@/modules/prompt/models/prompt'
 
 export default {
   name: 'PromptVersion',

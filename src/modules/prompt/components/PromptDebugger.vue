@@ -366,8 +366,8 @@
 import { ref, computed, watch } from 'vue'
 import { ElMessage } from 'element-plus'
 import { Loading, Back, Plus, Delete } from '@element-plus/icons-vue'
-import { promptApi } from '@/api/prompt'
-import PromptMarkdownPreview from '@/components/PromptMarkdownPreview.vue'
+import { promptApi } from '@/modules/prompt/api/prompt'
+import PromptMarkdownPreview from '@/modules/prompt/components/PromptMarkdownPreview.vue'
 import { 
   getDefaultModel, 
   isValidModelForProvider,
@@ -376,8 +376,8 @@ import {
   isModelSupportTypes,
   isModelSupportInputType,
   AI_PROVIDER_OPTIONS
-} from '@/config/ai'
-import { FORMAT_TYPE_OPTIONS, PROMPT_TYPE_OPTIONS, RETURN_TYPE_OPTIONS } from '@/models/prompt'
+} from '@/modules/prompt/config/ai'
+import { FORMAT_TYPE_OPTIONS, PROMPT_TYPE_OPTIONS, RETURN_TYPE_OPTIONS } from '@/modules/prompt/models/prompt'
 
 export default {
   name: 'PromptDebugger',

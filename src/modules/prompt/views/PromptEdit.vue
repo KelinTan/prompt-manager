@@ -245,16 +245,16 @@ import { ref, reactive, computed, watch, onMounted } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { ElMessage, ElMessageBox } from 'element-plus'
 import { ChatDotRound, Lock } from '@element-plus/icons-vue'
-import { promptApi } from '@/api/prompt'
-import { Prompt, FORMAT_TYPE_OPTIONS, RETURN_TYPE_OPTIONS, PROMPT_TYPE_OPTIONS } from '@/models/prompt'
+import { promptApi } from '@/modules/prompt/api/prompt'
+import { Prompt, FORMAT_TYPE_OPTIONS, RETURN_TYPE_OPTIONS, PROMPT_TYPE_OPTIONS } from '@/modules/prompt/models/prompt'
 import { 
   AI_PROVIDER_OPTIONS, 
   getModelsByProvider, 
   getDefaultModel, 
   getModelsByProviderAndTypes,
   isModelSupportTypes 
-} from '@/config/ai'
-import PromptMarkdownPreview from '@/components/PromptMarkdownPreview.vue'
+} from '@/modules/prompt/config/ai'
+import PromptMarkdownPreview from '@/modules/prompt/components/PromptMarkdownPreview.vue'
 
 
 export default {

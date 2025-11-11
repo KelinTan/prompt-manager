@@ -1,5 +1,5 @@
-import api from '@/api/request'
-import { useAuthStore } from '@/stores/auth'
+import api from '@/modules/common/api/request'
+import { useAuthStore } from '@/modules/common/stores/auth'
 
 export const promptApi = {
   // 获取prompt列表

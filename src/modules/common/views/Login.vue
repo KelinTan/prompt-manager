@@ -19,9 +19,9 @@
               </defs>
             </svg>
           </div>
-          <h1>Prompt Manager</h1>
+          <h1>AIGC Admin</h1>
         </div>
-        <p class="login-subtitle">登录到您的账户</p>
+        <p class="login-subtitle">AI 内容生成管理平台</p>
       </div>
 
       <el-form
@@ -71,7 +71,7 @@
     </div>
 
     <div class="login-footer">
-      <p>&copy; 2025 Prompt Manager. All rights reserved.</p>
+      <p>&copy; 2025 AIGC Admin. All rights reserved.</p>
     </div>
   </div>
 </template>
@@ -81,8 +81,8 @@ import { ref, reactive } from 'vue'
 import { useRouter } from 'vue-router'
 import { ElMessage } from 'element-plus'
 import { User, Lock } from '@element-plus/icons-vue'
-import { authApi } from '@/api/auth'
-import { useAuthStore } from '@/stores/auth'
+import { authApi } from '@/modules/common/api/auth'
+import { useAuthStore } from '@/modules/common/stores/auth'
 
 export default {
   name: 'Login',

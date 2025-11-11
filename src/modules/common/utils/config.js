@@ -4,7 +4,7 @@ export const config = {
   apiBaseUrl: import.meta.env.VITE_API_BASE_URL || 'http://localhost:8080/api',
   
   // 应用标题
-  appTitle: import.meta.env.VITE_APP_TITLE || 'Prompt Manager',
+  appTitle: import.meta.env.VITE_APP_TITLE || 'AIGC Admin',
   
   // 是否为开发环境
   isDev: import.meta.env.DEV,
@@ -24,21 +24,21 @@ export const config = {
   // 日志输出（仅开发环境）
   log: (...args) => {
     if (config.isDev) {
-      console.log('[Prompt Manager]', ...args)
+      console.log('[AIGC Admin]', ...args)
     }
   },
   
   // 错误日志
   error: (...args) => {
     if (config.isDev) {
-      console.error('[Prompt Manager Error]', ...args)
+      console.error('[AIGC Admin Error]', ...args)
     }
   },
   
   // 警告日志
   warn: (...args) => {
     if (config.isDev) {
-      console.warn('[Prompt Manager Warning]', ...args)
+      console.warn('[AIGC Admin Warning]', ...args)
     }
   }
 }

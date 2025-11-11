@@ -21,6 +21,10 @@
               <el-icon><Document /></el-icon>
               <span>Prompt管理</span>
             </router-link>
+            <router-link to="/tasks" class="nav-link" :class="{ active: isTaskRoute }">
+              <el-icon><List /></el-icon>
+              <span>任务列表</span>
+            </router-link>
             <router-link to="/ai-assistant" class="nav-link" :class="{ active: route.path === '/ai-assistant' }">
               <el-icon><ChatDotRound /></el-icon>
               <span>AI助手</span>
@@ -65,9 +69,9 @@
 import { computed } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { ElMessage, ElMessageBox } from 'element-plus'
-import { Document, ChatDotRound, User, ArrowDown, SwitchButton } from '@element-plus/icons-vue'
-import { config } from '@/utils/config'
-import { useAuthStore } from '@/stores/auth'
+import { Document, ChatDotRound, List, User, ArrowDown, SwitchButton } from '@element-plus/icons-vue'
+import { config } from '@/modules/common/utils/config'
+import { useAuthStore } from '@/modules/common/stores/auth'
 
 export default {
   name: 'App',
@@ -82,6 +86,9 @@ export default {
     
     // 检查是否为Prompt相关路由
     const isPromptRoute = computed(() => route.path.startsWith('/prompts'))
+    
+    // 检查是否为Task相关路由
+    const isTaskRoute = computed(() => route.path.startsWith('/tasks'))
     
     // 用户操作处理
     const handleUserCommand = async (command) => {
@@ -113,6 +120,7 @@ export default {
       appTitle,
       isLoginPage,
       isPromptRoute,
+      isTaskRoute,
       route,
       authStore,
       handleUserCommand

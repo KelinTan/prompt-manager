@@ -20,7 +20,7 @@
 
 <script>
 import { ref, onMounted } from 'vue'
-import PromptDebugger from '@/components/PromptDebugger.vue'
+import PromptDebugger from '@/modules/prompt/components/PromptDebugger.vue'
 
 export default {
   name: 'AIAssistant',

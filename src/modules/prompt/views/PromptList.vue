@@ -238,9 +238,9 @@
 import { ref, reactive, onMounted, onBeforeUnmount, watch } from 'vue'
 import { useRouter } from 'vue-router'
 import { ElMessage, ElMessageBox } from 'element-plus'
-import { promptApi } from '@/api/prompt'
-import { FORMAT_TYPE_OPTIONS, PROMPT_STATUS_OPTIONS } from '@/models/prompt'
-import { AI_PROVIDER_OPTIONS } from '@/config/ai'
+import { promptApi } from '@/modules/prompt/api/prompt'
+import { FORMAT_TYPE_OPTIONS, PROMPT_STATUS_OPTIONS } from '@/modules/prompt/models/prompt'
+import { AI_PROVIDER_OPTIONS } from '@/modules/prompt/config/ai'
 
 const SEARCH_STORAGE_KEY = 'promptListSearchState'
 const PAGINATION_STORAGE_KEY = 'promptListPaginationState'
