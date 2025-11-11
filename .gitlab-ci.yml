@@ -17,7 +17,7 @@ variables:
   npm_config_cache: "$CI_PROJECT_DIR/.npm"
   # 构建产物目录
   BUILD_DIR: "dist"
-  APPLICATION_NAME: "prompt-manager"
+  APPLICATION_NAME: "aigc-admin"
 
 # 定义可复用的构建模板
 .build_template: &build_template
