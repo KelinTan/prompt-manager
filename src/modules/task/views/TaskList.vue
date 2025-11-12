@@ -18,9 +18,9 @@
             >
               <el-option
                 v-for="type in taskTypes"
-                :key="type"
-                :label="type"
-                :value="type"
+                :key="type.value"
+                :label="type.label"
+                :value="type.value"
               />
             </el-select>
             
@@ -97,7 +97,7 @@
                   <code class="uuid-text">{{ task.uuid }}</code>
                 </td>
                 <td>
-                  <el-tag size="small" type="info">{{ task.task_type }}</el-tag>
+                  <el-tag size="small" type="info">{{ getTaskTypeLabel(task.task_type) }}</el-tag>
                 </td>
                 <td>
                   <el-tag 
@@ -186,7 +186,7 @@
           <el-descriptions-item label="UUID">
             <code>{{ selectedTask.uuid }}</code>
           </el-descriptions-item>
-          <el-descriptions-item label="类型">{{ selectedTask.task_type }}</el-descriptions-item>
+          <el-descriptions-item label="类型">{{ getTaskTypeLabel(selectedTask.task_type) }}</el-descriptions-item>
           <el-descriptions-item label="状态">
             <el-tag :type="getStatusInfo(selectedTask.status).type">
               {{ getStatusInfo(selectedTask.status).label }}
@@ -306,6 +306,12 @@ export default {
       }
     }
     
+    // 获取任务类型标签
+    const getTaskTypeLabel = (taskType) => {
+      const type = taskTypes.value.find(item => item.value === taskType)
+      return type ? type.label : taskType
+    }
+
     // 查看任务详情
     const handleViewTask = (task) => {
       selectedTask.value = task
@@ -397,6 +403,7 @@ export default {
       canceling,
       selectedTaskId,
       getStatusInfo,
+      getTaskTypeLabel,
       formatDuration,
       formatDate,
       formatJson,

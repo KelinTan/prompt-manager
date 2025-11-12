@@ -19,6 +19,7 @@ export const taskApi = {
 
   /**
    * 获取任务类型列表
+   * @returns {Array} 任务类型数组，格式：[{value: string, label: string}]
    */
   async getTaskTypes() {
     const response = await api.get('/tasks/type')
