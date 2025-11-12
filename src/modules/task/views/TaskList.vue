@@ -131,6 +131,16 @@
                     >
                       重试
                     </el-button>
+                    <el-button 
+                      size="small" 
+                      type="danger"
+                      @click="handleCancelTask(task)"
+                      :loading="canceling && selectedTaskId === task.id"
+                      :disabled="task.status !== 'pending'"
+                      v-if="task.status === 'pending'"
+                    >
+                      取消
+                    </el-button>
                   </div>
                 </td>
               </tr>
@@ -235,6 +245,7 @@ export default {
     const detailDialogVisible = ref(false)
     const selectedTask = ref(null)
     const retrying = ref(false)
+    const canceling = ref(false)
     const selectedTaskId = ref(null)
     
     const statusOptions = TASK_STATUS_OPTIONS
@@ -328,6 +339,40 @@ export default {
         selectedTaskId.value = null
       }
     }
+
+    // 取消任务
+    const handleCancelTask = async (task) => {
+      try {
+        await ElMessageBox.confirm(
+          `确定要取消任务 #${task.id} (${task.uuid}) 吗？\n注意：只有待处理状态的任务才能取消。`,
+          '确认取消',
+          {
+            confirmButtonText: '确定取消',
+            cancelButtonText: '保留任务',
+            type: 'warning',
+            dangerouslyUseHTMLString: false
+          }
+        )
+        
+        if (task.status !== 'pending') {
+          ElMessage.error('只有待处理状态的任务才能取消')
+          return
+        }
+        
+        canceling.value = true
+        selectedTaskId.value = task.id
+        await taskApi.cancelTask(task.uuid)
+        ElMessage.success('任务已取消')
+        await loadTasks()
+      } catch (e) {
+        if (e !== 'cancel') {
+          ElMessage.error('取消失败: ' + (e.message || e))
+        }
+      } finally {
+        canceling.value = false
+        selectedTaskId.value = null
+      }
+    }
     
     onMounted(() => {
       loadTaskTypes()
@@ -349,6 +394,7 @@ export default {
       detailDialogVisible,
       selectedTask,
       retrying,
+      canceling,
       selectedTaskId,
       getStatusInfo,
       formatDuration,
@@ -359,7 +405,8 @@ export default {
       prevPage,
       nextPage,
       handleViewTask,
-      handleRetryTask
+      handleRetryTask,
+      handleCancelTask
     }
   }
 }

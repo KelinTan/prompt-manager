@@ -34,4 +34,13 @@ export const taskApi = {
     const response = await api.post(`/tasks/${uuid}/retry`)
     return response.data
   },
+
+  /**
+   * 取消任务
+   * @param {string} uuid - 任务 UUID
+   */
+  async cancelTask(uuid) {
+    const response = await api.post(`/tasks/${uuid}/cancel`)
+    return response.data
+  },
 }

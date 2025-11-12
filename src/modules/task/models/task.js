@@ -6,7 +6,7 @@ export class Task {
     this.id = data.id || null
     this.uuid = data.uuid || ''
     this.task_type = data.task_type || ''
-    this.status = data.status || 'pending' // pending, started, success, failure
+    this.status = data.status || 'pending' // pending, started, success, failure, canceled
     this.params = data.params || {}
     this.result = data.result || null
     this.retry_count = data.retry_count || 0
@@ -22,7 +22,8 @@ export const TASK_STATUS_OPTIONS = [
   { label: '待处理', value: 'pending', type: 'warning', color: '#f59e0b' },
   { label: '执行中', value: 'started', type: 'primary', color: '#3b82f6' },
   { label: '成功', value: 'success', type: 'success', color: '#10b981' },
-  { label: '失败', value: 'failure', type: 'danger', color: '#ef4444' }
+  { label: '失败', value: 'failure', type: 'danger', color: '#ef4444' },
+  { label: '已取消', value: 'canceled', type: 'info', color: '#909399' }
 ]
 
 // 获取状态信息
