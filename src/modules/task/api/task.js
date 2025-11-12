@@ -18,15 +18,6 @@ export const taskApi = {
   },
 
   /**
-   * 获取任务详情
-   * @param {string|number} id - 任务 ID
-   */
-  async getTask(id) {
-    const response = await api.get(`/tasks/${id}`)
-    return response.data
-  },
-
-  /**
    * 获取任务类型列表
    */
   async getTaskTypes() {
@@ -34,14 +25,6 @@ export const taskApi = {
     return response.data || []
   },
 
-  /**
-   * 创建任务
-   * @param {Object} data - 任务数据
-   */
-  async createTask(data) {
-    const response = await api.post('/tasks', data)
-    return response.data
-  },
 
   /**
    * 重试任务
@@ -51,22 +34,4 @@ export const taskApi = {
     const response = await api.post(`/tasks/${uuid}/retry`)
     return response.data
   },
-
-  /**
-   * 取消任务
-   * @param {string|number} id - 任务 ID
-   */
-  async cancelTask(id) {
-    const response = await api.post(`/tasks/${id}/cancel`)
-    return response.data
-  },
-
-  /**
-   * 删除任务
-   * @param {string|number} id - 任务 ID
-   */
-  async deleteTask(id) {
-    const response = await api.delete(`/tasks/${id}`)
-    return response.data
-  }
 }
