@@ -132,6 +132,8 @@
                   <div class="action-buttons">
                     <el-button 
                       size="small" 
+                      type="primary"
+                      link
                       @click="handleViewTask(task)"
                     >
                       查看
@@ -139,6 +141,7 @@
                     <el-button 
                       size="small" 
                       type="warning"
+                      link
                       @click="handleRetryTask(task)"
                       :loading="retrying && selectedTaskId === task.id"
                     >
@@ -147,6 +150,7 @@
                     <el-button 
                       size="small" 
                       type="danger"
+                      link
                       @click="handleCancelTask(task)"
                       :loading="canceling && selectedTaskId === task.id"
                       :disabled="task.status !== 'pending'"
@@ -569,7 +573,18 @@ export default {
 
 .action-buttons {
   display: flex;
-  gap: 8px;
+  align-items: center;
+  gap: 4px;
+  white-space: nowrap;
+}
+
+.action-buttons .el-button {
+  padding: 4px 8px;
+  font-size: 13px;
+}
+
+.action-buttons .el-button + .el-button {
+  margin-left: 0;
 }
 
 .table-footer {
