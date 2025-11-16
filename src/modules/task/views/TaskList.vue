@@ -9,6 +9,19 @@
         
         <div class="header-center">
           <div class="filter-container">
+            <el-input
+              v-model="uuidFilter"
+              placeholder="输入任务UUID查询"
+              clearable
+              @change="handleSearch"
+              @clear="handleSearch"
+              class="filter-input"
+            >
+              <template #prefix>
+                <el-icon><Search /></el-icon>
+              </template>
+            </el-input>
+            
             <el-select
               v-model="taskTypeFilter"
               placeholder="所有类型"
@@ -223,14 +236,15 @@ import {
   formatDate, 
   formatJson 
 } from '../models/task'
-import { Refresh, Loading, Warning } from '@element-plus/icons-vue'
+import { Refresh, Loading, Warning, Search } from '@element-plus/icons-vue'
 
 export default {
   name: 'TaskList',
   components: {
     Refresh,
     Loading,
-    Warning
+    Warning,
+    Search
   },
   setup() {
     const loading = ref(false)
@@ -240,6 +254,7 @@ export default {
     const total = ref(0)
     const page = ref(1)
     const pageSize = ref(20)
+    const uuidFilter = ref('')
     const taskTypeFilter = ref('')
     const statusFilter = ref('')
     const detailDialogVisible = ref(false)
@@ -270,6 +285,7 @@ export default {
           page: page.value,
           size: pageSize.value
         }
+        if (uuidFilter.value) params.task_uuid = uuidFilter.value.trim()
         if (taskTypeFilter.value) params.task_type = taskTypeFilter.value
         if (statusFilter.value) params.status = statusFilter.value
         
@@ -393,6 +409,7 @@ export default {
       total,
       page,
       pageSize,
+      uuidFilter,
       taskTypeFilter,
       statusFilter,
       statusOptions,
@@ -467,6 +484,10 @@ export default {
   display: flex;
   gap: 12px;
   align-items: center;
+}
+
+.filter-input {
+  width: 240px;
 }
 
 .filter-select {

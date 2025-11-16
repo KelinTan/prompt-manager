@@ -9,6 +9,7 @@ export const taskApi = {
    * @param {Object} params - 查询参数
    * @param {number} params.page - 页码
    * @param {number} params.size - 每页数量
+   * @param {string} params.task_uuid - 任务UUID（精确查询）
    * @param {string} params.task_type - 任务类型
    * @param {string} params.status - 任务状态
    */
