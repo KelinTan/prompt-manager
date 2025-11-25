@@ -1,7 +1,7 @@
 <template>
   <div class="markdown-preview">
     <div v-if="!content || !content.trim()" class="empty">预览区域（暂无内容）</div>
-    <div v-else v-html="sanitizedHtml" class="markdown-body"></div>
+    <div v-else class="markdown-body" v-html="sanitizedHtml"></div>
   </div>
 </template>
 
@@ -81,12 +81,15 @@ const rawHtml = computed(() => {
 
   // Fallback: basic escaping + minimal markdown handling
   const text = props.content || ''
-  const escapeHtml = (s) => s.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
+  const escapeHtml = s => s.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
   const escaped = escapeHtml(text)
   // code fences ``` -> <pre><code>
   const withCode = escaped.replace(/```([\s\S]*?)```/g, (_m, p1) => `<pre><code>${p1}</code></pre>`)
   // convert double newlines to paragraphs and single newlines to <br>
-  const paragraphs = withCode.split(/\n\s*\n/).map(s => `<p>${s.replace(/\n/g, '<br/>')}</p>`).join('')
+  const paragraphs = withCode
+    .split(/\n\s*\n/)
+    .map(s => `<p>${s.replace(/\n/g, '<br/>')}</p>`)
+    .join('')
   return paragraphs
 })
 
@@ -115,10 +118,33 @@ const sanitizedHtml = computed(() => {
   word-break: break-word;
 }
 
-.markdown-body h1 { font-size: 1.6em; margin: 0.5em 0; }
-.markdown-body h2 { font-size: 1.4em; margin: 0.45em 0; }
-.markdown-body p { margin: 0.5em 0; color: var(--text-secondary); }
-.markdown-body pre { background: #0b0b0b; padding: 10px; border-radius: 6px; overflow: auto; }
-.markdown-body code { background: rgba(0,0,0,0.04); padding: 2px 6px; border-radius: 4px; font-family: 'SF Mono', monospace; }
-.empty { color: var(--text-muted); padding: 20px; text-align: center; }
+.markdown-body h1 {
+  font-size: 1.6em;
+  margin: 0.5em 0;
+}
+.markdown-body h2 {
+  font-size: 1.4em;
+  margin: 0.45em 0;
+}
+.markdown-body p {
+  margin: 0.5em 0;
+  color: var(--text-secondary);
+}
+.markdown-body pre {
+  background: #0b0b0b;
+  padding: 10px;
+  border-radius: 6px;
+  overflow: auto;
+}
+.markdown-body code {
+  background: rgba(0, 0, 0, 0.04);
+  padding: 2px 6px;
+  border-radius: 4px;
+  font-family: 'SF Mono', monospace;
+}
+.empty {
+  color: var(--text-muted);
+  padding: 20px;
+  text-align: center;
+}
 </style>

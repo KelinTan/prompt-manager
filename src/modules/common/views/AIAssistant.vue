@@ -6,7 +6,7 @@
     </div>
 
     <div class="assistant-container">
-      <PromptDebugger 
+      <PromptDebugger
         ref="debuggerRef"
         :model="''"
         :ai-provider="''"
@@ -40,7 +40,7 @@ export default {
         const storedConfig = localStorage.getItem('ai-assistant-config')
         if (storedConfig) {
           const config = JSON.parse(storedConfig)
-          
+
           // 检查配置是否是最近的（5分钟内）
           const now = Date.now()
           if (now - config.timestamp < 5 * 60 * 1000) {
@@ -48,10 +48,10 @@ export default {
             if (debuggerRef.value) {
               debuggerRef.value.loadExternalConfig(config)
             }
-            
+
             // 清除存储的配置
             localStorage.removeItem('ai-assistant-config')
-            
+
             console.log('已加载外部配置:', config)
           }
         }
@@ -104,7 +104,9 @@ export default {
 .assistant-container {
   background: #ffffff;
   border-radius: 12px;
-  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+  box-shadow:
+    0 4px 6px -1px rgba(0, 0, 0, 0.1),
+    0 2px 4px -1px rgba(0, 0, 0, 0.06);
   padding: 24px;
 }
 
@@ -113,11 +115,11 @@ export default {
   .page-header h1 {
     color: #f9fafb;
   }
-  
+
   .page-description {
     color: #d1d5db;
   }
-  
+
   .assistant-container {
     background: #374151;
   }

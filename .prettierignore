@@ -1,0 +1,12 @@
+node_modules
+dist
+.vscode
+.idea
+*.log
+.DS_Store
+public
+*.min.js
+*.md
+package-lock.json
+pnpm-lock.yaml
+yarn.lock

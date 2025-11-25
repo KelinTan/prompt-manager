@@ -40,12 +40,15 @@ export class Prompt {
     if (!this.name.trim()) errors.push('唯一标识不能为空')
     if (!this.title.trim()) errors.push('标题不能为空')
     if (!this.template.trim()) errors.push('模板不能为空')
-    
+
     // audio 和 video 类型需要至少一个 URL
-    if ((this.type === 'audio' || this.type === 'video') && (!this.urls || this.urls.length === 0)) {
+    if (
+      (this.type === 'audio' || this.type === 'video') &&
+      (!this.urls || this.urls.length === 0)
+    ) {
       errors.push(`${this.type === 'audio' ? '音频' : '视频'}类型需要至少提供一个URL`)
     }
-    
+
     return errors
   }
 
@@ -53,8 +56,6 @@ export class Prompt {
   needsUrls() {
     return this.type === 'audio' || this.type === 'video'
   }
-
-
 }
 
 // 格式类型选项
@@ -63,8 +64,6 @@ export const FORMAT_TYPE_OPTIONS = [
   { label: '花括号 {}', value: 'braces' },
   { label: '无', value: 'none' }
 ]
-
-
 
 // 返回类型选项
 export const RETURN_TYPE_OPTIONS = [

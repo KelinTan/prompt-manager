@@ -35,7 +35,7 @@ export function getStatusInfo(status) {
 // 格式化持续时间（毫秒转秒）
 export function formatDuration(ms) {
   if (!ms) return '-'
-  return (ms / 1000).toFixed(2) + 's'
+  return `${(ms / 1000).toFixed(2)}s`
 }
 
 // 格式化日期

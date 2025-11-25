@@ -15,38 +15,38 @@ const api = axios.create({
 
 // 请求拦截器 - 添加认证头
 api.interceptors.request.use(
-  (config) => {
+  config => {
     const authStore = useAuthStore()
     const token = authStore.getToken()
-    
+
     if (token) {
       config.headers.Authorization = `Bearer ${token}`
     }
-    
+
     return config
   },
-  (error) => {
+  error => {
     return Promise.reject(error)
   }
 )
 
 // 响应拦截器 - 处理认证错误
 api.interceptors.response.use(
-  (response) => {
+  response => {
     return response
   },
-  (error) => {
+  error => {
     const authStore = useAuthStore()
-    
+
     if (error.response) {
       const { status, data } = error.response
-      
+
       switch (status) {
         case 401:
           // 未授权，清除认证信息并跳转到登录页
           authStore.clearAuth()
           ElMessage.error('登录已过期，请重新登录')
-          
+
           // 避免在登录页面重复跳转
           if (!window.location.hash.includes('#/login')) {
             // Preserve the current pathname (deployment base) when redirecting to the hash route.
@@ -56,19 +56,19 @@ api.interceptors.response.use(
             window.location.href = `${window.location.origin}${basePath}#/login`
           }
           break
-          
+
         case 403:
           ElMessage.error('没有权限访问此资源')
           break
-          
+
         case 404:
           ElMessage.error('请求的资源不存在')
           break
-          
+
         case 500:
           ElMessage.error('服务器内部错误')
           break
-          
+
         default:
           ElMessage.error(data?.message || '请求失败')
       }
@@ -77,7 +77,7 @@ api.interceptors.response.use(
     } else {
       ElMessage.error('请求配置错误')
     }
-    
+
     return Promise.reject(error)
   }
 )

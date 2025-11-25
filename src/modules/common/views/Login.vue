@@ -5,16 +5,16 @@
         <div class="logo">
           <div class="logo-icon">
             <svg viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg">
-              <circle cx="16" cy="16" r="16" fill="url(#gradient)"/>
-              <rect x="7" y="9" width="18" height="12" rx="3" fill="white" opacity="0.95"/>
-              <rect x="10" y="12" width="8" height="1.5" rx="0.75" fill="#6366F1"/>
-              <rect x="10" y="15" width="12" height="1.5" rx="0.75" fill="#6366F1" opacity="0.7"/>
-              <rect x="10" y="18" width="6" height="1.5" rx="0.75" fill="#6366F1" opacity="0.5"/>
-              <polygon points="12,21 15,21 13.5,24" fill="white" opacity="0.95"/>
+              <circle cx="16" cy="16" r="16" fill="url(#gradient)" />
+              <rect x="7" y="9" width="18" height="12" rx="3" fill="white" opacity="0.95" />
+              <rect x="10" y="12" width="8" height="1.5" rx="0.75" fill="#6366F1" />
+              <rect x="10" y="15" width="12" height="1.5" rx="0.75" fill="#6366F1" opacity="0.7" />
+              <rect x="10" y="18" width="6" height="1.5" rx="0.75" fill="#6366F1" opacity="0.5" />
+              <polygon points="12,21 15,21 13.5,24" fill="white" opacity="0.95" />
               <defs>
                 <linearGradient id="gradient" x1="0%" y1="0%" x2="100%" y2="100%">
-                  <stop offset="0%" style="stop-color:#6366F1"/>
-                  <stop offset="100%" style="stop-color:#8B5CF6"/>
+                  <stop offset="0%" style="stop-color: #6366f1" />
+                  <stop offset="100%" style="stop-color: #8b5cf6" />
                 </linearGradient>
               </defs>
             </svg>
@@ -99,14 +99,12 @@ export default {
     // 表单数据
     const loginForm = reactive({
       username: import.meta.env.DEV ? 'kelin.tan' : '', // 开发环境预填用户名
-      password: import.meta.env.DEV ? 'tanzhuchao' : ''  // 开发环境预填密码
+      password: import.meta.env.DEV ? 'tanzhuchao' : '' // 开发环境预填密码
     })
 
     // 验证规则
     const loginRules = {
-      username: [
-        { required: true, message: '请输入用户名', trigger: 'blur' }
-      ],
+      username: [{ required: true, message: '请输入用户名', trigger: 'blur' }],
       password: [
         { required: true, message: '请输入密码', trigger: 'blur' },
         { min: 6, message: '密码长度至少6位', trigger: 'blur' }
@@ -117,35 +115,34 @@ export default {
     const handleLogin = async () => {
       try {
         await loginFormRef.value.validate()
-        
+
         loading.value = true
         const response = await authApi.login(loginForm)
-        
+
         // 检查是否获取到 token
         if (!response.token) {
           throw new Error('登录响应格式错误，未获取到访问令牌')
         }
-        
+
         // 保存认证信息
         authStore.setToken(response.token)
         authStore.setUser(response.user || { username: loginForm.username })
-        
+
         ElMessage.success('登录成功')
-        
+
         // 跳转到首页
         const redirect = router.currentRoute.value.query.redirect || '/prompts'
         router.push(redirect)
-        
       } catch (error) {
         console.error('登录错误:', error)
-        
+
         // 处理不同类型的错误
         let errorMessage = '登录失败，请检查用户名和密码'
-        
+
         if (error.response) {
           const status = error.response.status
           const data = error.response.data
-          
+
           switch (status) {
             case 401:
               errorMessage = '用户名或密码错误'
@@ -167,7 +164,7 @@ export default {
         } else {
           errorMessage = error.message || '登录失败'
         }
-        
+
         ElMessage.error(errorMessage)
       } finally {
         loading.value = false
@@ -202,7 +199,9 @@ export default {
   background: white;
   border-radius: 16px;
   padding: 40px;
-  box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+  box-shadow:
+    0 20px 25px -5px rgba(0, 0, 0, 0.1),
+    0 10px 10px -5px rgba(0, 0, 0, 0.04);
   width: 100%;
   max-width: 400px;
 }
@@ -311,7 +310,7 @@ export default {
     padding: 32px 24px;
     margin: 16px;
   }
-  
+
   .logo h1 {
     font-size: 24px;
   }

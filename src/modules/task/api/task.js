@@ -27,7 +27,6 @@ export const taskApi = {
     return response.data || []
   },
 
-
   /**
    * 重试任务
    * @param {string} uuid - 任务 UUID
@@ -44,5 +43,5 @@ export const taskApi = {
   async cancelTask(uuid) {
     const response = await api.post(`/tasks/${uuid}/cancel`)
     return response.data
-  },
+  }
 }

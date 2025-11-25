@@ -4,11 +4,7 @@
       <h2>{{ promptData?.title || promptData?.name }} - 版本 {{ version }}</h2>
       <div class="header-actions">
         <el-button @click="handleBack">返回历史</el-button>
-        <el-button 
-          v-if="!isCurrentVersion"
-          type="warning" 
-          @click="handleRestoreVersion"
-        >
+        <el-button v-if="!isCurrentVersion" type="warning" @click="handleRestoreVersion">
           恢复此版本
         </el-button>
       </div>
@@ -25,8 +21,12 @@
                 <span v-if="isCurrentVersion">(当前版本)</span>
               </el-tag>
             </el-descriptions-item>
-            <el-descriptions-item label="创建时间">{{ formatDate(promptData.created_at) }}</el-descriptions-item>
-            <el-descriptions-item label="更新时间">{{ formatDate(promptData.updated_at) }}</el-descriptions-item>
+            <el-descriptions-item label="创建时间">
+              {{ formatDate(promptData.created_at) }}
+            </el-descriptions-item>
+            <el-descriptions-item label="更新时间">
+              {{ formatDate(promptData.updated_at) }}
+            </el-descriptions-item>
           </el-descriptions>
         </div>
 
@@ -38,9 +38,15 @@
             <el-descriptions-item label="标识">{{ promptData.name }}</el-descriptions-item>
             <el-descriptions-item label="类型">{{ promptData.type || '-' }}</el-descriptions-item>
             <el-descriptions-item label="模型">{{ promptData.model || '-' }}</el-descriptions-item>
-            <el-descriptions-item label="返回类型">{{ promptData.return_type || '-' }}</el-descriptions-item>
-            <el-descriptions-item label="AI提供商">{{ promptData.ai_provider || '-' }}</el-descriptions-item>
-            <el-descriptions-item label="格式类型">{{ getFormatTypeLabel(promptData.format_type) }}</el-descriptions-item>
+            <el-descriptions-item label="返回类型">
+              {{ promptData.return_type || '-' }}
+            </el-descriptions-item>
+            <el-descriptions-item label="AI提供商">
+              {{ promptData.ai_provider || '-' }}
+            </el-descriptions-item>
+            <el-descriptions-item label="格式类型">
+              {{ getFormatTypeLabel(promptData.format_type) }}
+            </el-descriptions-item>
             <el-descriptions-item label="Mock状态">
               <el-tag :type="promptData.mock ? 'success' : 'danger'" size="small">
                 {{ promptData.mock ? '启用' : '禁用' }}
@@ -55,17 +61,11 @@
           <h3>模板内容</h3>
           <div class="template-container">
             <div class="template-toolbar">
-              <el-button 
-                size="small" 
-                @click="copyTemplate"
-              >
+              <el-button size="small" @click="copyTemplate">
                 <el-icon><DocumentCopy /></el-icon>
                 复制模板
               </el-button>
-              <el-button 
-                size="small" 
-                @click="toggleFullscreen"
-              >
+              <el-button size="small" @click="toggleFullscreen">
                 <el-icon><FullScreen /></el-icon>
                 全屏查看
               </el-button>
@@ -82,23 +82,16 @@
 
         <!-- 参数列表 -->
 
-
         <!-- Mock数据 -->
         <div v-if="promptData.mock && promptData.mock_data" class="mock-section">
           <h3>Mock 数据</h3>
           <div class="mock-container">
             <div class="mock-toolbar">
-              <el-button 
-                size="small" 
-                @click="copyMockData"
-              >
+              <el-button size="small" @click="copyMockData">
                 <el-icon><DocumentCopy /></el-icon>
                 复制Mock数据
               </el-button>
-              <el-button 
-                size="small" 
-                @click="formatMockDataDisplay"
-              >
+              <el-button size="small" @click="formatMockDataDisplay">
                 <el-icon><Edit /></el-icon>
                 格式化
               </el-button>
@@ -128,7 +121,7 @@
         type="textarea"
         :rows="25"
         readonly
-        style="font-family: 'Monaco', 'Menlo', 'Ubuntu Mono', monospace;"
+        style="font-family: 'Monaco', 'Menlo', 'Ubuntu Mono', monospace"
       />
     </el-dialog>
   </div>
@@ -160,13 +153,13 @@ export default {
     })
 
     // 获取格式类型标签
-    const getFormatTypeLabel = (value) => {
+    const getFormatTypeLabel = value => {
       const option = FORMAT_TYPE_OPTIONS.find(item => item.value === value)
       return option ? option.label : value
     }
 
     // 格式化日期
-    const formatDate = (dateString) => {
+    const formatDate = dateString => {
       if (!dateString) return ''
       return new Date(dateString).toLocaleString('zh-CN')
     }
@@ -177,17 +170,16 @@ export default {
       try {
         const data = await promptApi.getPromptVersion(promptId, version)
         promptData.value = data
-        
-
 
         // 处理Mock数据显示
         if (promptData.value.mock_data) {
-          mockDataDisplay.value = typeof promptData.value.mock_data === 'string' 
-            ? promptData.value.mock_data 
-            : JSON.stringify(promptData.value.mock_data, null, 2)
+          mockDataDisplay.value =
+            typeof promptData.value.mock_data === 'string'
+              ? promptData.value.mock_data
+              : JSON.stringify(promptData.value.mock_data, null, 2)
         }
       } catch (error) {
-        ElMessage.error('加载版本数据失败: ' + error.message)
+        ElMessage.error(`加载版本数据失败: ${error.message}`)
         router.push(`/prompts/${promptId}/history`)
       } finally {
         loading.value = false
@@ -251,12 +243,12 @@ export default {
 
         await promptApi.updatePrompt(promptId, restoreData)
         ElMessage.success('版本恢复成功')
-        
+
         // 跳转到编辑页面
         router.push(`/prompts/${promptId}/edit`)
       } catch (error) {
         if (error !== 'cancel') {
-          ElMessage.error('恢复版本失败: ' + error.message)
+          ElMessage.error(`恢复版本失败: ${error.message}`)
         }
       }
     }

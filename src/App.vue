@@ -7,14 +7,29 @@
           <div class="navbar-brand">
             <div class="brand-icon">
               <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                <path d="M12 2L2 7L12 12L22 7L12 2Z" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/>
-                <path d="M2 17L12 22L22 17" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/>
-                <path d="M2 12L12 17L22 12" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/>
+                <path
+                  d="M12 2L2 7L12 12L22 7L12 2Z"
+                  stroke="currentColor"
+                  stroke-width="2"
+                  stroke-linejoin="round"
+                />
+                <path
+                  d="M2 17L12 22L22 17"
+                  stroke="currentColor"
+                  stroke-width="2"
+                  stroke-linejoin="round"
+                />
+                <path
+                  d="M2 12L12 17L22 12"
+                  stroke="currentColor"
+                  stroke-width="2"
+                  stroke-linejoin="round"
+                />
               </svg>
             </div>
             <h1 class="brand-title">{{ appTitle }}</h1>
           </div>
-          
+
           <!-- 导航菜单 -->
           <nav class="navbar-nav">
             <router-link to="/prompts" class="nav-link" :class="{ active: isPromptRoute }">
@@ -25,15 +40,19 @@
               <el-icon><List /></el-icon>
               <span>任务列表</span>
             </router-link>
-            <router-link to="/ai-assistant" class="nav-link" :class="{ active: route.path === '/ai-assistant' }">
+            <router-link
+              to="/ai-assistant"
+              class="nav-link"
+              :class="{ active: route.path === '/ai-assistant' }"
+            >
               <el-icon><ChatDotRound /></el-icon>
               <span>AI助手</span>
             </router-link>
           </nav>
-          
+
           <div class="navbar-actions">
             <div class="user-section">
-              <el-dropdown @command="handleUserCommand" trigger="click">
+              <el-dropdown trigger="click" @command="handleUserCommand">
                 <div class="user-info">
                   <el-avatar :size="32" class="user-avatar">
                     <el-icon><User /></el-icon>
@@ -54,7 +73,7 @@
           </div>
         </div>
       </header>
-      
+
       <!-- 主要内容区域 -->
       <main class="main-content" :class="{ 'login-layout': isLoginPage }">
         <div class="content-container" :class="{ 'login-container': isLoginPage }">
@@ -69,7 +88,14 @@
 import { computed } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { ElMessage, ElMessageBox } from 'element-plus'
-import { Document, ChatDotRound, List, User, ArrowDown, SwitchButton } from '@element-plus/icons-vue'
+import {
+  Document,
+  ChatDotRound,
+  List,
+  User,
+  ArrowDown,
+  SwitchButton
+} from '@element-plus/icons-vue'
 import { config } from '@/modules/common/utils/config'
 import { useAuthStore } from '@/modules/common/stores/auth'
 
@@ -80,34 +106,30 @@ export default {
     const router = useRouter()
     const authStore = useAuthStore()
     const appTitle = computed(() => config.appTitle)
-    
+
     // 检查是否为登录页面
     const isLoginPage = computed(() => route.path === '/login')
-    
+
     // 检查是否为Prompt相关路由
     const isPromptRoute = computed(() => route.path.startsWith('/prompts'))
-    
+
     // 检查是否为Task相关路由
     const isTaskRoute = computed(() => route.path.startsWith('/tasks'))
-    
+
     // 用户操作处理
-    const handleUserCommand = async (command) => {
+    const handleUserCommand = async command => {
       if (command === 'logout') {
         try {
-          await ElMessageBox.confirm(
-            '确定要退出登录吗？',
-            '确认退出',
-            {
-              confirmButtonText: '确定',
-              cancelButtonText: '取消',
-              type: 'warning'
-            }
-          )
-          
+          await ElMessageBox.confirm('确定要退出登录吗？', '确认退出', {
+            confirmButtonText: '确定',
+            cancelButtonText: '取消',
+            type: 'warning'
+          })
+
           // 清除认证信息
           authStore.clearAuth()
           ElMessage.success('退出登录成功')
-          
+
           // 跳转到登录页
           router.push('/login')
         } catch (error) {
@@ -115,7 +137,7 @@ export default {
         }
       }
     }
-    
+
     return {
       appTitle,
       isLoginPage,
@@ -299,19 +321,19 @@ export default {
   .navbar-container {
     padding: 0 var(--spacing-md);
   }
-  
+
   .navbar-nav {
     display: none;
   }
-  
+
   .brand-title {
     font-size: 18px;
   }
-  
+
   .content-container {
     padding: 0 var(--spacing-md);
   }
-  
+
   .main-content {
     padding: var(--spacing-lg) 0;
   }
@@ -322,11 +344,11 @@ export default {
     height: 56px;
     padding: 0 var(--spacing-sm);
   }
-  
+
   .navbar-actions .create-btn span {
     display: none;
   }
-  
+
   .content-container {
     padding: 0 var(--spacing-sm);
   }

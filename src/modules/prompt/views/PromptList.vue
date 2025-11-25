@@ -10,13 +10,13 @@
             <p class="page-subtitle">管理和组织你的 AI Prompt 模板</p>
           </div>
         </div>
-        
+
         <!-- 中间搜索区域 -->
         <div class="header-center">
           <div class="search-container">
             <div class="search-row">
-              <el-input 
-                v-model="searchForm.keyword" 
+              <el-input
+                v-model="searchForm.keyword"
                 placeholder="搜索名称或标题..."
                 class="search-input"
                 size="large"
@@ -56,21 +56,20 @@
                 <el-option label="已启用" :value="true" />
                 <el-option label="已禁用" :value="false" />
               </el-select>
-              <el-button 
-                size="large" 
-                @click="handleReset"
-                class="reset-btn"
-              >
-                重置
-              </el-button>
+              <el-button size="large" class="reset-btn" @click="handleReset">重置</el-button>
             </div>
           </div>
         </div>
-        
+
         <!-- 右侧操作区域 -->
         <div class="header-right">
           <div class="action-section">
-            <el-button type="primary" size="large" class="create-btn" @click="$router.push('/prompts/create')">
+            <el-button
+              type="primary"
+              size="large"
+              class="create-btn"
+              @click="$router.push('/prompts/create')"
+            >
               <el-icon><Plus /></el-icon>
               新建 Prompt
             </el-button>
@@ -80,7 +79,7 @@
     </div>
 
     <!-- 现代卡片网格布局 -->
-    <div class="prompts-grid" v-loading="loading">
+    <div v-loading="loading" class="prompts-grid">
       <div v-if="prompts.length === 0" class="empty-state">
         <div class="empty-icon">
           <el-icon><Document /></el-icon>
@@ -92,10 +91,10 @@
           创建 Prompt
         </el-button>
       </div>
-      
+
       <div v-else class="cards-container">
-        <div 
-          v-for="prompt in prompts" 
+        <div
+          v-for="prompt in prompts"
           :key="prompt.id"
           class="prompt-card"
           :class="{ 'disabled-card': !prompt.enabled }"
@@ -107,30 +106,33 @@
               <div class="card-subtitle">{{ prompt.name }}</div>
               <div class="card-meta">
                 <span class="prompt-type">{{ prompt.type || '未分类' }}</span>
-                <span 
+                <span
                   class="version-badge"
-                  :class="{ 'draft-version': prompt.status === 'draft', 'published-version': prompt.status === 'published' }"
+                  :class="{
+                    'draft-version': prompt.status === 'draft',
+                    'published-version': prompt.status === 'published'
+                  }"
                 >
                   {{ getVersionLabel(prompt) }}
                 </span>
               </div>
             </div>
             <div class="card-status">
-              <el-tag 
-                :type="getStatusInfo(prompt.status).type" 
-                size="small"
-                class="status-tag"
-              >
+              <el-tag :type="getStatusInfo(prompt.status).type" size="small" class="status-tag">
                 {{ getStatusInfo(prompt.status).label }}
               </el-tag>
             </div>
           </div>
-          
+
           <div class="card-content">
             <p class="template-preview">
-              {{ prompt.template ? prompt.template.substring(0, 120) + (prompt.template.length > 120 ? '...' : '') : '暂无模板内容' }}
+              {{
+                prompt.template
+                  ? prompt.template.substring(0, 120) + (prompt.template.length > 120 ? '...' : '')
+                  : '暂无模板内容'
+              }}
             </p>
-            
+
             <div class="card-tags">
               <el-tag v-if="prompt.ai_provider" size="small" class="provider-tag">
                 {{ prompt.ai_provider }}
@@ -143,71 +145,53 @@
               </el-tag>
             </div>
           </div>
-          
+
           <div class="card-footer">
             <div class="card-info">
               <span class="created-time">{{ formatDate(prompt.created_at) }}</span>
             </div>
             <div class="card-actions" @click.stop>
-              <el-button 
-                size="small" 
-                type="primary"
-                link
-                @click="handleEdit(prompt)"
-              >
+              <el-button size="small" type="primary" link @click="handleEdit(prompt)">
                 <el-icon><Edit /></el-icon>
               </el-button>
-              <el-tooltip v-if="prompt.status === 'published'" content="当前已发布，无法再次发布" placement="top">
-                <el-button 
-                  size="small" 
-                  type="success"
-                  link
-                  disabled
-                >
+              <el-tooltip
+                v-if="prompt.status === 'published'"
+                content="当前已发布，无法再次发布"
+                placement="top"
+              >
+                <el-button size="small" type="success" link disabled>
                   <el-icon><Upload /></el-icon>
                 </el-button>
               </el-tooltip>
-              <el-button 
+              <el-button
                 v-else
-                size="small" 
+                size="small"
                 type="success"
                 link
-                @click="handlePublish(prompt)"
                 :loading="publishingIds.has(prompt.id)"
+                @click="handlePublish(prompt)"
               >
                 <el-icon><Upload /></el-icon>
               </el-button>
-              <el-button 
-                size="small" 
-                type="info"
-                link
-                @click="handleHistory(prompt)"
-              >
+              <el-button size="small" type="info" link @click="handleHistory(prompt)">
                 <el-icon><Clock /></el-icon>
               </el-button>
               <el-tooltip :content="prompt.enabled ? '禁用' : '启用'" placement="top">
-                <el-button 
-                  size="small" 
+                <el-button
+                  size="small"
                   :type="prompt.enabled ? 'warning' : 'success'"
                   link
-                  @click="handleToggleEnabled(prompt)"
                   :loading="togglingIds.has(prompt.id)"
+                  @click="handleToggleEnabled(prompt)"
                 >
                   <el-icon>
                     <component :is="prompt.enabled ? 'CircleClose' : 'CircleCheck'" />
                   </el-icon>
                 </el-button>
               </el-tooltip>
-              <el-popconfirm
-                title="确定要删除这个Prompt吗？"
-                @confirm="handleDelete(prompt)"
-              >
+              <el-popconfirm title="确定要删除这个Prompt吗？" @confirm="handleDelete(prompt)">
                 <template #reference>
-                  <el-button 
-                    size="small" 
-                    type="danger"
-                    link
-                  >
+                  <el-button size="small" type="danger" link>
                     <el-icon><Delete /></el-icon>
                   </el-button>
                 </template>
@@ -226,9 +210,9 @@
         :page-sizes="[12, 24, 48]"
         :total="pagination.total"
         layout="total, sizes, prev, pager, next"
+        class="modern-pagination"
         @size-change="handleSizeChange"
         @current-change="handleCurrentChange"
-        class="modern-pagination"
       />
     </div>
   </div>
@@ -256,19 +240,23 @@ export default {
 
     // 从 sessionStorage 恢复搜索条件
     const savedSearchState = sessionStorage.getItem(SEARCH_STORAGE_KEY)
-    const initialSearchState = savedSearchState ? JSON.parse(savedSearchState) : {
-      keyword: '',
-      ai_provider: '',
-      enabled: undefined
-    }
+    const initialSearchState = savedSearchState
+      ? JSON.parse(savedSearchState)
+      : {
+          keyword: '',
+          ai_provider: '',
+          enabled: undefined
+        }
 
     // 从 sessionStorage 恢复分页状态
     const savedPaginationState = sessionStorage.getItem(PAGINATION_STORAGE_KEY)
-    const initialPaginationState = savedPaginationState ? JSON.parse(savedPaginationState) : {
-      page: 1,
-      size: 12,
-      total: 0
-    }
+    const initialPaginationState = savedPaginationState
+      ? JSON.parse(savedPaginationState)
+      : {
+          page: 1,
+          size: 12,
+          total: 0
+        }
 
     // 搜索表单
     const searchForm = reactive(initialSearchState)
@@ -280,13 +268,13 @@ export default {
     const aiProviderOptions = AI_PROVIDER_OPTIONS
 
     // 获取格式类型标签
-    const getFormatTypeLabel = (value) => {
+    const getFormatTypeLabel = value => {
       const option = FORMAT_TYPE_OPTIONS.find(item => item.value === value)
       return option ? option.label : value
     }
 
     // 获取状态标签和类型
-    const getStatusInfo = (status) => {
+    const getStatusInfo = status => {
       const statusMap = {
         draft: { label: '草稿', type: 'info' },
         published: { label: '已发布', type: 'success' }
@@ -295,7 +283,7 @@ export default {
     }
 
     // 获取版本描述
-    const getVersionLabel = (prompt) => {
+    const getVersionLabel = prompt => {
       if (!prompt.version) return '初始版本'
       if (prompt.status === 'published') {
         return `第${prompt.version}版`
@@ -305,7 +293,7 @@ export default {
     }
 
     // 格式化日期
-    const formatDate = (dateString) => {
+    const formatDate = dateString => {
       if (!dateString) return ''
       return new Date(dateString).toLocaleString('zh-CN')
     }
@@ -319,7 +307,7 @@ export default {
           size: pagination.size,
           ...searchForm
         }
-        
+
         // 过滤空值
         Object.keys(params).forEach(key => {
           if (params[key] === '' || params[key] === null || params[key] === undefined) {
@@ -331,7 +319,7 @@ export default {
         prompts.value = response.items || []
         pagination.total = response.total || 0
       } catch (error) {
-        ElMessage.error('加载数据失败: ' + error.message)
+        ElMessage.error(`加载数据失败: ${error.message}`)
       } finally {
         loading.value = false
       }
@@ -356,29 +344,29 @@ export default {
     }
 
     // 页面大小改变
-    const handleSizeChange = (size) => {
+    const handleSizeChange = size => {
       pagination.size = size
       loadData()
     }
 
     // 当前页改变
-    const handleCurrentChange = (page) => {
+    const handleCurrentChange = page => {
       pagination.page = page
       loadData()
     }
 
     // 行点击
-    const handleRowClick = (row) => {
+    const handleRowClick = row => {
       router.push(`/prompts/${row.id}/edit`)
     }
 
     // 编辑
-    const handleEdit = (row) => {
+    const handleEdit = row => {
       router.push(`/prompts/${row.id}/edit`)
     }
 
     // 发布
-    const handlePublish = async (row) => {
+    const handlePublish = async row => {
       // 如果已经是已发布状态，不允许再次发布
       if (row.status === 'published') {
         ElMessage.info('该 Prompt 已是已发布状态，无法重复发布')
@@ -401,7 +389,7 @@ export default {
         loadData() // 重新加载数据
       } catch (error) {
         if (error !== 'cancel') {
-          ElMessage.error('发布失败: ' + error.message)
+          ElMessage.error(`发布失败: ${error.message}`)
         }
       } finally {
         publishingIds.value.delete(row.id)
@@ -409,23 +397,23 @@ export default {
     }
 
     // 查看历史
-    const handleHistory = (row) => {
+    const handleHistory = row => {
       router.push(`/prompts/${row.id}/history`)
     }
 
     // 删除
-    const handleDelete = async (row) => {
+    const handleDelete = async row => {
       try {
         await promptApi.deletePrompt(row.id)
         ElMessage.success('删除成功')
         loadData()
       } catch (error) {
-        ElMessage.error('删除失败: ' + error.message)
+        ElMessage.error(`删除失败: ${error.message}`)
       }
     }
 
     // 切换启用/禁用状态
-    const handleToggleEnabled = async (row) => {
+    const handleToggleEnabled = async row => {
       const action = row.enabled ? '禁用' : '启用'
       try {
         await ElMessageBox.confirm(
@@ -449,7 +437,7 @@ export default {
         loadData() // 重新加载数据
       } catch (error) {
         if (error !== 'cancel') {
-          ElMessage.error(`${action}失败: ` + error.message)
+          ElMessage.error(`${action}失败: ${error.message}`)
         }
       } finally {
         togglingIds.value.delete(row.id)
@@ -457,14 +445,22 @@ export default {
     }
 
     // 监听搜索条件变化，保存到 sessionStorage
-    watch(searchForm, (newVal) => {
-      sessionStorage.setItem(SEARCH_STORAGE_KEY, JSON.stringify(newVal))
-    }, { deep: true })
+    watch(
+      searchForm,
+      newVal => {
+        sessionStorage.setItem(SEARCH_STORAGE_KEY, JSON.stringify(newVal))
+      },
+      { deep: true }
+    )
 
     // 监听分页状态变化，保存到 sessionStorage
-    watch(pagination, (newVal) => {
-      sessionStorage.setItem(PAGINATION_STORAGE_KEY, JSON.stringify(newVal))
-    }, { deep: true })
+    watch(
+      pagination,
+      newVal => {
+        sessionStorage.setItem(PAGINATION_STORAGE_KEY, JSON.stringify(newVal))
+      },
+      { deep: true }
+    )
 
     // 组件卸载前清理（可选，如果希望关闭标签页后清除状态）
     // onBeforeUnmount(() => {
@@ -669,10 +665,6 @@ export default {
   transform: translateY(0);
 }
 
-
-
-
-
 /* 搜索区域优化 */
 :deep(.search-input .el-input__wrapper) {
   border-radius: var(--radius-xl);
@@ -755,8 +747,6 @@ export default {
   color: var(--text-muted);
   font-size: 15px;
 }
-
-
 
 .filter-select {
   min-width: 140px;
@@ -1120,25 +1110,25 @@ export default {
     align-items: stretch;
     gap: var(--spacing-md);
   }
-  
+
   .page-title {
     font-size: 28px;
   }
-  
+
   .filters-section {
     padding: var(--spacing-md);
   }
-  
+
   .filter-tabs {
     flex-direction: column;
     align-items: stretch;
     gap: var(--spacing-sm);
   }
-  
+
   .cards-container {
     grid-template-columns: 1fr;
   }
-  
+
   .search-input-wrapper {
     max-width: none;
   }
@@ -1151,31 +1141,31 @@ export default {
     gap: var(--spacing-md);
     text-align: center;
   }
-  
+
   .header-center {
     order: -1;
   }
-  
+
   .search-container {
     max-width: 500px;
   }
-  
+
   .search-row {
     flex-direction: column;
     gap: var(--spacing-sm);
   }
-  
+
   .search-input,
   .provider-select {
     flex: none;
     width: 100%;
   }
-  
+
   .header-left,
   .header-right {
     justify-content: center;
   }
-  
+
   .title-section {
     text-align: center;
   }
@@ -1185,20 +1175,20 @@ export default {
   .header-container {
     padding: var(--spacing-md) var(--spacing-lg);
   }
-  
+
   .page-title {
     font-size: 24px;
   }
-  
+
   .page-subtitle {
     font-size: 13px;
   }
-  
+
   .create-btn {
     padding: var(--spacing-sm) var(--spacing-md);
     font-size: 14px;
   }
-  
+
   :deep(.search-input .el-input__wrapper) {
     height: 44px;
   }
@@ -1208,23 +1198,23 @@ export default {
   .header-container {
     padding: var(--spacing-sm) var(--spacing-md);
   }
-  
+
   .page-title {
     font-size: 20px;
   }
-  
+
   .page-subtitle {
     font-size: 12px;
   }
-  
+
   .prompt-card {
     padding: var(--spacing-md);
   }
-  
+
   .card-title {
     font-size: 16px;
   }
-  
+
   .create-btn span {
     display: none;
   }

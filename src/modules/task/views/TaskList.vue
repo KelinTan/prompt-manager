@@ -6,28 +6,28 @@
           <h1 class="page-title">任务列表</h1>
           <p class="page-subtitle">管理和监控 AIGC 任务（共 {{ total }} 个）</p>
         </div>
-        
+
         <div class="header-center">
           <div class="filter-container">
             <el-input
               v-model="uuidFilter"
               placeholder="输入任务UUID查询"
               clearable
+              class="filter-input"
               @change="handleSearch"
               @clear="handleSearch"
-              class="filter-input"
             >
               <template #prefix>
                 <el-icon><Search /></el-icon>
               </template>
             </el-input>
-            
+
             <el-select
               v-model="taskTypeFilter"
               placeholder="所有类型"
               clearable
-              @change="handleSearch"
               class="filter-select"
+              @change="handleSearch"
             >
               <el-option
                 v-for="type in taskTypes"
@@ -36,13 +36,13 @@
                 :value="type.value"
               />
             </el-select>
-            
+
             <el-select
               v-model="statusFilter"
               placeholder="所有状态"
               clearable
-              @change="handleSearch"
               class="filter-select"
+              @change="handleSearch"
             >
               <el-option
                 v-for="option in statusOptions"
@@ -51,18 +51,14 @@
                 :value="option.value"
               />
             </el-select>
-            
-            <el-select
-              v-model.number="pageSize"
-              @change="handleSearch"
-              class="filter-select"
-            >
+
+            <el-select v-model.number="pageSize" class="filter-select" @change="handleSearch">
               <el-option :value="10" label="10 / 页" />
               <el-option :value="20" label="20 / 页" />
               <el-option :value="50" label="50 / 页" />
             </el-select>
-            
-            <el-button @click="loadTasks" :loading="loading">
+
+            <el-button :loading="loading" @click="loadTasks">
               <el-icon><Refresh /></el-icon>
               刷新
             </el-button>
@@ -77,17 +73,17 @@
           <el-icon class="is-loading"><Loading /></el-icon>
           <p>加载中...</p>
         </div>
-        
+
         <div v-else-if="error" class="error-state">
           <el-icon><Warning /></el-icon>
           <p>{{ error }}</p>
           <el-button @click="loadTasks">重试</el-button>
         </div>
-        
+
         <div v-else-if="tasks.length === 0" class="empty-state">
           <el-empty description="暂无任务" />
         </div>
-        
+
         <div v-else class="table-container">
           <table class="task-table">
             <thead>
@@ -113,10 +109,7 @@
                   <el-tag size="small" type="info">{{ getTaskTypeLabel(task.task_type) }}</el-tag>
                 </td>
                 <td>
-                  <el-tag 
-                    size="small" 
-                    :type="getStatusInfo(task.status).type"
-                  >
+                  <el-tag size="small" :type="getStatusInfo(task.status).type">
                     {{ getStatusInfo(task.status).label }}
                   </el-tag>
                 </td>
@@ -130,31 +123,26 @@
                 </td>
                 <td>
                   <div class="action-buttons">
-                    <el-button 
-                      size="small" 
-                      type="primary"
-                      link
-                      @click="handleViewTask(task)"
-                    >
+                    <el-button size="small" type="primary" link @click="handleViewTask(task)">
                       查看
                     </el-button>
-                    <el-button 
-                      size="small" 
+                    <el-button
+                      size="small"
                       type="warning"
                       link
-                      @click="handleRetryTask(task)"
                       :loading="retrying && selectedTaskId === task.id"
+                      @click="handleRetryTask(task)"
                     >
                       重试
                     </el-button>
-                    <el-button 
-                      size="small" 
+                    <el-button
+                      v-if="task.status === 'pending'"
+                      size="small"
                       type="danger"
                       link
-                      @click="handleCancelTask(task)"
                       :loading="canceling && selectedTaskId === task.id"
                       :disabled="task.status !== 'pending'"
-                      v-if="task.status === 'pending'"
+                      @click="handleCancelTask(task)"
                     >
                       取消
                     </el-button>
@@ -164,25 +152,15 @@
             </tbody>
           </table>
         </div>
-        
+
         <div v-if="tasks.length > 0" class="table-footer">
           <div class="footer-info">
             第 {{ page }} 页，共 {{ totalPages }} 页（总计 {{ total }} 条）
           </div>
           <div class="footer-pagination">
-            <el-button 
-              size="small"
-              @click="prevPage" 
-              :disabled="page === 1"
-            >
-              上一页
-            </el-button>
+            <el-button size="small" :disabled="page === 1" @click="prevPage">上一页</el-button>
             <span class="page-info">{{ page }} / {{ totalPages }}</span>
-            <el-button 
-              size="small"
-              @click="nextPage" 
-              :disabled="page === totalPages"
-            >
+            <el-button size="small" :disabled="page === totalPages" @click="nextPage">
               下一页
             </el-button>
           </div>
@@ -203,16 +181,26 @@
           <el-descriptions-item label="UUID">
             <code>{{ selectedTask.uuid }}</code>
           </el-descriptions-item>
-          <el-descriptions-item label="类型">{{ getTaskTypeLabel(selectedTask.task_type) }}</el-descriptions-item>
+          <el-descriptions-item label="类型">
+            {{ getTaskTypeLabel(selectedTask.task_type) }}
+          </el-descriptions-item>
           <el-descriptions-item label="状态">
             <el-tag :type="getStatusInfo(selectedTask.status).type">
               {{ getStatusInfo(selectedTask.status).label }}
             </el-tag>
           </el-descriptions-item>
-          <el-descriptions-item label="重试次数">{{ selectedTask.retry_count }}</el-descriptions-item>
-          <el-descriptions-item label="耗时">{{ formatDuration(selectedTask.cost_time) }}</el-descriptions-item>
-          <el-descriptions-item label="创建时间">{{ formatDate(selectedTask.created_at) }}</el-descriptions-item>
-          <el-descriptions-item label="更新时间">{{ formatDate(selectedTask.updated_at) }}</el-descriptions-item>
+          <el-descriptions-item label="重试次数">
+            {{ selectedTask.retry_count }}
+          </el-descriptions-item>
+          <el-descriptions-item label="耗时">
+            {{ formatDuration(selectedTask.cost_time) }}
+          </el-descriptions-item>
+          <el-descriptions-item label="创建时间">
+            {{ formatDate(selectedTask.created_at) }}
+          </el-descriptions-item>
+          <el-descriptions-item label="更新时间">
+            {{ formatDate(selectedTask.updated_at) }}
+          </el-descriptions-item>
         </el-descriptions>
 
         <div class="detail-section">
@@ -233,12 +221,12 @@
 import { ref, computed, onMounted } from 'vue'
 import { ElMessage, ElMessageBox } from 'element-plus'
 import { taskApi } from '../api/task'
-import { 
-  TASK_STATUS_OPTIONS, 
-  getStatusInfo, 
-  formatDuration, 
-  formatDate, 
-  formatJson 
+import {
+  TASK_STATUS_OPTIONS,
+  getStatusInfo,
+  formatDuration,
+  formatDate,
+  formatJson
 } from '../models/task'
 import { Refresh, Loading, Warning, Search } from '@element-plus/icons-vue'
 
@@ -266,11 +254,11 @@ export default {
     const retrying = ref(false)
     const canceling = ref(false)
     const selectedTaskId = ref(null)
-    
+
     const statusOptions = TASK_STATUS_OPTIONS
-    
+
     const totalPages = computed(() => Math.max(1, Math.ceil(total.value / pageSize.value)))
-    
+
     // 加载任务类型列表
     const loadTaskTypes = async () => {
       try {
@@ -279,7 +267,7 @@ export default {
         console.error('加载任务类型失败:', e)
       }
     }
-    
+
     // 加载任务列表
     const loadTasks = async () => {
       loading.value = true
@@ -292,7 +280,7 @@ export default {
         if (uuidFilter.value) params.task_uuid = uuidFilter.value.trim()
         if (taskTypeFilter.value) params.task_type = taskTypeFilter.value
         if (statusFilter.value) params.status = statusFilter.value
-        
+
         const data = await taskApi.getTasks(params)
         tasks.value = data.items || []
         total.value = data.total || 0
@@ -303,13 +291,13 @@ export default {
         loading.value = false
       }
     }
-    
+
     // 搜索
     const handleSearch = () => {
       page.value = 1
       loadTasks()
     }
-    
+
     // 上一页
     const prevPage = () => {
       if (page.value > 1) {
@@ -317,7 +305,7 @@ export default {
         loadTasks()
       }
     }
-    
+
     // 下一页
     const nextPage = () => {
       if (page.value < totalPages.value) {
@@ -325,32 +313,28 @@ export default {
         loadTasks()
       }
     }
-    
+
     // 获取任务类型标签
-    const getTaskTypeLabel = (taskType) => {
+    const getTaskTypeLabel = taskType => {
       const type = taskTypes.value.find(item => item.value === taskType)
       return type ? type.label : taskType
     }
 
     // 查看任务详情
-    const handleViewTask = (task) => {
+    const handleViewTask = task => {
       selectedTask.value = task
       detailDialogVisible.value = true
     }
-    
+
     // 重试任务
-    const handleRetryTask = async (task) => {
+    const handleRetryTask = async task => {
       try {
-        await ElMessageBox.confirm(
-          `确定要重试任务 #${task.id} (${task.uuid}) 吗？`,
-          '确认重试',
-          {
-            confirmButtonText: '确定',
-            cancelButtonText: '取消',
-            type: 'warning'
-          }
-        )
-        
+        await ElMessageBox.confirm(`确定要重试任务 #${task.id} (${task.uuid}) 吗？`, '确认重试', {
+          confirmButtonText: '确定',
+          cancelButtonText: '取消',
+          type: 'warning'
+        })
+
         retrying.value = true
         selectedTaskId.value = task.id
         await taskApi.retryTask(task.uuid)
@@ -358,7 +342,7 @@ export default {
         await loadTasks()
       } catch (e) {
         if (e !== 'cancel') {
-          ElMessage.error('重试失败: ' + (e.message || e))
+          ElMessage.error(`重试失败: ${e.message || e}`)
         }
       } finally {
         retrying.value = false
@@ -367,7 +351,7 @@ export default {
     }
 
     // 取消任务
-    const handleCancelTask = async (task) => {
+    const handleCancelTask = async task => {
       try {
         await ElMessageBox.confirm(
           `确定要取消任务 #${task.id} (${task.uuid}) 吗？\n注意：只有待处理状态的任务才能取消。`,
@@ -379,12 +363,12 @@ export default {
             dangerouslyUseHTMLString: false
           }
         )
-        
+
         if (task.status !== 'pending') {
           ElMessage.error('只有待处理状态的任务才能取消')
           return
         }
-        
+
         canceling.value = true
         selectedTaskId.value = task.id
         await taskApi.cancelTask(task.uuid)
@@ -392,19 +376,19 @@ export default {
         await loadTasks()
       } catch (e) {
         if (e !== 'cancel') {
-          ElMessage.error('取消失败: ' + (e.message || e))
+          ElMessage.error(`取消失败: ${e.message || e}`)
         }
       } finally {
         canceling.value = false
         selectedTaskId.value = null
       }
     }
-    
+
     onMounted(() => {
       loadTaskTypes()
       loadTasks()
     })
-    
+
     return {
       loading,
       error,

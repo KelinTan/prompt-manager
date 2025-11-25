@@ -12,7 +12,7 @@ authState.isAuthenticated = !!authState.token
 
 export const useAuthStore = () => {
   // 设置 token
-  const setToken = (token) => {
+  const setToken = token => {
     authState.token = token
     authState.isAuthenticated = !!token
     if (token) {
@@ -23,7 +23,7 @@ export const useAuthStore = () => {
   }
 
   // 设置用户信息
-  const setUser = (user) => {
+  const setUser = user => {
     authState.user = user
     if (user) {
       localStorage.setItem('auth_user', JSON.stringify(user))
@@ -51,7 +51,7 @@ export const useAuthStore = () => {
   return {
     // 状态
     ...authState,
-    
+
     // 方法
     setToken,
     setUser,

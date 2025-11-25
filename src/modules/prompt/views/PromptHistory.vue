@@ -14,7 +14,9 @@
       <div class="history-info">
         <el-descriptions :column="4" border>
           <el-descriptions-item label="当前版本">{{ currentVersion }}</el-descriptions-item>
-          <el-descriptions-item label="显示版本数">{{ historyList.length }} / 最近10个</el-descriptions-item>
+          <el-descriptions-item label="显示版本数">
+            {{ historyList.length }} / 最近10个
+          </el-descriptions-item>
           <el-descriptions-item label="创建时间">{{ formatDate(createdAt) }}</el-descriptions-item>
           <el-descriptions-item label="最后更新">{{ formatDate(updatedAt) }}</el-descriptions-item>
         </el-descriptions>
@@ -35,15 +37,9 @@
                 <div class="version-info">
                   <h4>版本 {{ version.version }}</h4>
                   <div class="version-tags">
-                    <el-tag 
-                      v-if="version.is_latest" 
-                      type="success" 
-                      size="small"
-                    >
-                      当前版本
-                    </el-tag>
-                    <el-tag 
-                      :type="getStatusInfo(version.status).type" 
+                    <el-tag v-if="version.is_latest" type="success" size="small">当前版本</el-tag>
+                    <el-tag
+                      :type="getStatusInfo(version.status).type"
                       size="small"
                       class="status-tag"
                     >
@@ -52,40 +48,36 @@
                   </div>
                 </div>
                 <div class="version-actions">
-                  <el-button 
-                    size="small" 
-                    @click="handleViewVersion(version)"
-                  >
-                    查看详情
-                  </el-button>
-                  <el-button 
+                  <el-button size="small" @click="handleViewVersion(version)">查看详情</el-button>
+                  <el-button
                     v-if="!version.is_latest"
-                    size="small" 
+                    size="small"
                     type="warning"
                     @click="handleCompareVersion(version)"
                   >
                     与当前版本对比
                   </el-button>
-                  <el-button 
+                  <el-button
                     v-if="!version.is_latest"
-                    size="small" 
+                    size="small"
                     type="danger"
-                    @click="handleRollback(version)"
                     :loading="rollbackingIds.has(version.id)"
+                    @click="handleRollback(version)"
                   >
                     回滚到此版本
                   </el-button>
                 </div>
               </div>
-              
+
               <div class="version-content">
                 <div class="version-changes">
                   <p><strong>模板预览:</strong></p>
                   <div class="template-preview">
-                    {{ version.template.substring(0, 200) }}{{ version.template.length > 200 ? '...' : '' }}
+                    {{ version.template.substring(0, 200)
+                    }}{{ version.template.length > 200 ? '...' : '' }}
                   </div>
                 </div>
-                
+
                 <div class="version-meta">
                   <el-row :gutter="20">
                     <el-col :span="6">
@@ -124,36 +116,42 @@
         <el-descriptions :column="2" border>
           <el-descriptions-item label="版本号">{{ selectedVersion.version }}</el-descriptions-item>
           <el-descriptions-item label="状态">
-            <el-tag 
-              :type="getStatusInfo(selectedVersion.status).type" 
-              size="small"
-            >
+            <el-tag :type="getStatusInfo(selectedVersion.status).type" size="small">
               {{ getStatusInfo(selectedVersion.status).label }}
             </el-tag>
           </el-descriptions-item>
-          <el-descriptions-item label="创建时间">{{ formatDate(selectedVersion.created_at) }}</el-descriptions-item>
+          <el-descriptions-item label="创建时间">
+            {{ formatDate(selectedVersion.created_at) }}
+          </el-descriptions-item>
           <el-descriptions-item label="标题">{{ selectedVersion.title }}</el-descriptions-item>
           <el-descriptions-item label="标识">{{ selectedVersion.name }}</el-descriptions-item>
-          <el-descriptions-item label="类型">{{ selectedVersion.type || '-' }}</el-descriptions-item>
-          <el-descriptions-item label="模型">{{ selectedVersion.model || '-' }}</el-descriptions-item>
-          <el-descriptions-item label="返回类型">{{ selectedVersion.return_type || '-' }}</el-descriptions-item>
-          <el-descriptions-item label="AI提供商">{{ selectedVersion.ai_provider || '-' }}</el-descriptions-item>
-          <el-descriptions-item label="格式类型">{{ getFormatTypeLabel(selectedVersion.format_type) }}</el-descriptions-item>
-          <el-descriptions-item label="Mock">{{ selectedVersion.mock ? '启用' : '禁用' }}</el-descriptions-item>
-          <el-descriptions-item label="备注" :span="2">{{ selectedVersion.remark || '-' }}</el-descriptions-item>
+          <el-descriptions-item label="类型">
+            {{ selectedVersion.type || '-' }}
+          </el-descriptions-item>
+          <el-descriptions-item label="模型">
+            {{ selectedVersion.model || '-' }}
+          </el-descriptions-item>
+          <el-descriptions-item label="返回类型">
+            {{ selectedVersion.return_type || '-' }}
+          </el-descriptions-item>
+          <el-descriptions-item label="AI提供商">
+            {{ selectedVersion.ai_provider || '-' }}
+          </el-descriptions-item>
+          <el-descriptions-item label="格式类型">
+            {{ getFormatTypeLabel(selectedVersion.format_type) }}
+          </el-descriptions-item>
+          <el-descriptions-item label="Mock">
+            {{ selectedVersion.mock ? '启用' : '禁用' }}
+          </el-descriptions-item>
+          <el-descriptions-item label="备注" :span="2">
+            {{ selectedVersion.remark || '-' }}
+          </el-descriptions-item>
         </el-descriptions>
 
         <div class="template-section">
           <h4>模板内容</h4>
-          <el-input
-            :model-value="selectedVersion.template"
-            type="textarea"
-            :rows="10"
-            readonly
-          />
+          <el-input :model-value="selectedVersion.template" type="textarea" :rows="10" readonly />
         </div>
-
-
 
         <div v-if="selectedVersion.mock && selectedVersion.mock_data" class="mock-section">
           <h4>Mock 数据</h4>
@@ -219,7 +217,7 @@ export default {
     const currentVersion = ref(1)
     const createdAt = ref('')
     const updatedAt = ref('')
-    
+
     // 对话框状态
     const versionDialogVisible = ref(false)
     const compareDialogVisible = ref(false)
@@ -233,13 +231,13 @@ export default {
     const promptId = route.params.id
 
     // 获取格式类型标签
-    const getFormatTypeLabel = (value) => {
+    const getFormatTypeLabel = value => {
       const option = FORMAT_TYPE_OPTIONS.find(item => item.value === value)
       return option ? option.label : value
     }
 
     // 获取状态信息
-    const getStatusInfo = (status) => {
+    const getStatusInfo = status => {
       const statusMap = {
         draft: { label: '草稿', type: 'info', color: '#909399' },
         published: { label: '已发布', type: 'success', color: '#67c23a' },
@@ -249,13 +247,13 @@ export default {
     }
 
     // 格式化日期
-    const formatDate = (dateString) => {
+    const formatDate = dateString => {
       if (!dateString) return ''
       return new Date(dateString).toLocaleString('zh-CN')
     }
 
     // 格式化Mock数据
-    const formatMockData = (data) => {
+    const formatMockData = data => {
       if (!data) return ''
       return typeof data === 'string' ? data : JSON.stringify(data, null, 2)
     }
@@ -266,7 +264,7 @@ export default {
       try {
         // 清空之前的数据
         historyList.value = []
-        
+
         // 获取当前prompt信息
         const currentPrompt = await promptApi.getPrompt(promptId)
         promptName.value = currentPrompt.title || currentPrompt.name
@@ -279,10 +277,10 @@ export default {
         // 获取历史版本（最近10个版本）
         const historyResponse = await promptApi.getPromptHistory(promptId, { size: 10 })
         historyList.value = historyResponse.items || []
-        
+
         // 按版本号降序排序，确保最新版本显示在前面
         historyList.value.sort((a, b) => b.version - a.version)
-        
+
         // 从历史列表中找到当前版本（is_latest = true）
         if (historyList.value.length > 0) {
           const latestVersion = historyList.value.find(v => v.is_latest) || historyList.value[0]
@@ -292,42 +290,42 @@ export default {
           currentVersionData.value = latestVersion
         }
       } catch (error) {
-        ElMessage.error('加载历史数据失败: ' + error.message)
+        ElMessage.error(`加载历史数据失败: ${error.message}`)
       } finally {
         loading.value = false
       }
     }
 
     // 查看版本详情
-    const handleViewVersion = async (version) => {
+    const handleViewVersion = async version => {
       try {
         const versionData = await promptApi.getPrompt(version.id)
         selectedVersion.value = versionData
         versionDialogVisible.value = true
       } catch (error) {
-        ElMessage.error('加载版本详情失败: ' + error.message)
+        ElMessage.error(`加载版本详情失败: ${error.message}`)
       }
     }
 
     // 对比版本
-    const handleCompareVersion = async (version) => {
+    const handleCompareVersion = async version => {
       try {
         const versionData = await promptApi.getPrompt(version.id)
         compareVersion.value = versionData
-        
+
         // 计算模板差异
         const oldTemplate = versionData.template || ''
         const newTemplate = currentVersionData.value?.template || ''
         templateDiffs.value = Diff.diffLines(oldTemplate, newTemplate)
-        
+
         compareDialogVisible.value = true
       } catch (error) {
-        ElMessage.error('加载版本数据失败: ' + error.message)
+        ElMessage.error(`加载版本数据失败: ${error.message}`)
       }
     }
 
     // 回滚版本
-    const handleRollback = async (version) => {
+    const handleRollback = async version => {
       try {
         await ElMessageBox.confirm(
           `确定要回滚到版本 ${version.version} 吗？这将会创建一个新的版本，内容与版本 ${version.version} 相同。`,
@@ -340,19 +338,19 @@ export default {
         )
 
         rollbackingIds.value.add(version.id)
-        await promptApi.rollbackPrompt(promptId, { 
+        await promptApi.rollbackPrompt(promptId, {
           target_version: version.version,
-          target_id: version.id 
+          target_id: version.id
         })
         ElMessage.success('回滚成功')
-        
+
         // 延迟一下确保后端数据已更新，然后重新加载历史数据
         setTimeout(async () => {
           await loadHistory()
         }, 500)
       } catch (error) {
         if (error !== 'cancel') {
-          ElMessage.error('回滚失败: ' + error.message)
+          ElMessage.error(`回滚失败: ${error.message}`)
         }
       } finally {
         rollbackingIds.value.delete(version.id)
@@ -444,7 +442,7 @@ export default {
 }
 
 .version-card.current-version {
-  border-color: #409EFF;
+  border-color: #409eff;
   box-shadow: 0 2px 12px 0 rgba(64, 158, 255, 0.1);
 }
 
@@ -516,7 +514,6 @@ export default {
 }
 
 .version-detail .template-section,
-
 .version-detail .mock-section {
   margin-top: 20px;
 }
