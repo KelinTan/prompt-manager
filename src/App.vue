@@ -128,7 +128,10 @@ export default {
 
           // 清除认证信息
           authStore.clearAuth()
-          ElMessage.success('退出登录成功')
+          ElMessage.success({
+            message: '已退出登录',
+            duration: 1500
+          })
 
           // 跳转到登录页
           router.push('/login')

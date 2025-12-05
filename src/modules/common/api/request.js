@@ -45,7 +45,10 @@ api.interceptors.response.use(
         case 401:
           // 未授权，清除认证信息并跳转到登录页
           authStore.clearAuth()
-          ElMessage.error('登录已过期，请重新登录')
+          ElMessage.error({
+            message: '登录已过期，请重新登录',
+            duration: 1500
+          })
 
           // 避免在登录页面重复跳转
           if (!window.location.hash.includes('#/login')) {

@@ -128,7 +128,10 @@ export default {
         authStore.setToken(response.token)
         authStore.setUser(response.user || { username: loginForm.username })
 
-        ElMessage.success('登录成功')
+        ElMessage.success({
+          message: '登录成功',
+          duration: 1500
+        })
 
         // 跳转到首页
         const redirect = router.currentRoute.value.query.redirect || '/prompts'
