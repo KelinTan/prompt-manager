@@ -301,28 +301,23 @@ export default {
     // 加载数据
     const loadData = async () => {
       loading.value = true
-      try {
-        const params = {
-          page: pagination.page,
-          size: pagination.size,
-          ...searchForm
-        }
-
-        // 过滤空值
-        Object.keys(params).forEach(key => {
-          if (params[key] === '' || params[key] === null || params[key] === undefined) {
-            delete params[key]
-          }
-        })
-
-        const response = await promptApi.getPrompts(params)
-        prompts.value = response.items || []
-        pagination.total = response.total || 0
-      } catch (error) {
-        ElMessage.error(`加载数据失败: ${error.message}`)
-      } finally {
-        loading.value = false
+      const params = {
+        page: pagination.page,
+        size: pagination.size,
+        ...searchForm
       }
+
+      // 过滤空值
+      Object.keys(params).forEach(key => {
+        if (params[key] === '' || params[key] === null || params[key] === undefined) {
+          delete params[key]
+        }
+      })
+
+      const response = await promptApi.getPrompts(params)
+      prompts.value = response.items || []
+      pagination.total = response.total || 0
+      loading.value = false
     }
 
     // 搜索

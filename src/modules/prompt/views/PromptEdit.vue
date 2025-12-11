@@ -399,22 +399,16 @@ export default {
       if (!isEdit.value) return
 
       loading.value = true
-      try {
-        const data = await promptApi.getPrompt(promptId.value)
-        Object.assign(form, new Prompt(data))
+      const data = await promptApi.getPrompt(promptId.value)
+      Object.assign(form, new Prompt(data))
 
-        // 处理Mock数据：确保 form.mock_data 是字符串或空字符串
-        if (form.mock_data === null || form.mock_data === undefined) {
-          form.mock_data = ''
-        } else if (typeof form.mock_data !== 'string') {
-          form.mock_data = JSON.stringify(form.mock_data, null, 2)
-        }
-      } catch (error) {
-        ElMessage.error(`加载数据失败: ${error.message}`)
-        router.push('/prompts')
-      } finally {
-        loading.value = false
+      // 处理Mock数据：确保 form.mock_data 是字符串或空字符串
+      if (form.mock_data === null || form.mock_data === undefined) {
+        form.mock_data = ''
+      } else if (typeof form.mock_data !== 'string') {
+        form.mock_data = JSON.stringify(form.mock_data, null, 2)
       }
+      loading.value = false
     }
 
     // 验证Mock数据（仅在返回类型为 json 时进行校验）
