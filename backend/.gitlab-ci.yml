@@ -1,0 +1,168 @@
+stages:
+  - test
+  - docker_build
+  - deploy_beta
+  - deploy_prod
+
+variables:
+  PIP_CACHE_DIR: "$CI_PROJECT_DIR/.cache/pip"
+  POETRY_CACHE_DIR: "$CI_PROJECT_DIR/.cache/pypoetry"
+  POETRY_VIRTUALENVS_IN_PROJECT: "true"
+
+#################################################################
+# Ci workflow
+#################################################################
+
+test:
+  image: hub.dproxy.saybot.net/library/python:3.11-slim
+  stage: test
+  variables:
+    POETRY_VIRTUALENVS_PATH: $CI_PROJECT_DIR/.venv
+  script:
+    - rm -rf .venv/bin
+    - pip install poetry==1.8.2
+    - poetry config virtualenvs.in-project true
+    - poetry install
+    - poetry run pytest --cov=src test/
+  artifacts:
+    paths:
+      - .coverage
+      - htmlcov
+  coverage: '/^TOTAL.+?(\d+\%)$/'
+  when: manual
+  allow_failure: true
+  cache:
+    paths:
+      - .cache/pip
+      - .cache/pytest_cache
+      - .cache/pypoetry
+      - .venv
+
+.default_aliyun: &DEFAULT_ALI
+  image: registry-mirrors.saybot.net/zhuzhu/docker:bash
+  services:
+    - name: docker:dind
+      command: ["--registry-mirror", "https://xfmruic4.mirror.aliyuncs.com"]
+  variables:
+    DOCKER_HOST: tcp://docker:2376
+    DOCKER_TLS_CERTDIR: "/certs"
+    DOCKER_TLS_VERIFY: 1
+    DOCKER_CERT_PATH: "$DOCKER_TLS_CERTDIR/client"
+    DOCKER_DRIVER: overlay2
+  tags:
+    - docker-ali
+
+.deploy_base_aliyun: &DEPLOY_BASE_ALIYUN
+  image: registry-mirrors.saybot.net/zhuzhu/helm-kubectl:2.9.1
+  variables:
+    DOCKER_HOST: tcp://docker:2376
+    DOCKER_TLS_CERTDIR: "/certs"
+    DOCKER_TLS_VERIFY: 1
+    DOCKER_CERT_PATH: "$DOCKER_TLS_CERTDIR/client"
+    DOCKER_DRIVER: overlay2
+  tags:
+    - docker-ali
+
+#################################################################
+# build
+#################################################################
+docker_build_aliyun:
+  <<: *DEFAULT_ALI
+  stage: docker_build
+  script:
+    - ./ci/docker_build.sh aliyun aigc
+  only:
+    - develop
+    - master
+    - /^feature\/.*$/
+
+#################################################################
+# deploy
+#################################################################
+deploy_service_beta:
+  <<: *DEPLOY_BASE_ALIYUN
+  stage: deploy_beta
+  script:
+    - ./ci/helm_deploy.sh aliyun beta aigc
+  environment:
+    name: service-beta
+  only:
+    - develop
+    - /^feature\/.*$/
+
+deploy_worker_beta:
+  <<: *DEPLOY_BASE_ALIYUN
+  stage: deploy_beta
+  script:
+    - ./ci/helm_deploy.sh aliyun beta aigc-worker
+  environment:
+    name: worker-beta
+  only:
+    - develop
+    - /^feature\/.*$/
+
+deploy_flower_beta:
+  <<: *DEPLOY_BASE_ALIYUN
+  stage: deploy_beta
+  script:
+    - ./ci/helm_deploy.sh aliyun beta aigc-flower
+  environment:
+    name: flower-beta
+  only:
+    - develop
+    - /^feature\/.*$/
+
+deploy_html_beta:
+  image: hub.dproxy.saybot.net/library/python:3.11-slim
+  stage: deploy_beta
+  script:
+    - pip install oss2 aliyun-python-sdk-cdn
+    - ls -l
+    - python ./ci/oss_upload.py --object_name aigc/document/document.html --local_file sample/document.html
+    - python ./ci/oss_upload.py --object_name aigc/speech/speech.html --local_file sample/speech.html
+    - python ./ci/oss_upload.py --object_name aigc/evaluation/evaluation.html --local_file sample/evaluation.html
+    - python ./ci/oss_upload.py --object_name aigc/exam/exam.html --local_file sample/exam.html
+  environment:
+    name: document-beta
+  only:
+    - develop
+  when: manual
+  cache: 
+    paths:
+      - .cache/pip
+
+deploy_service_prod:
+  <<: *DEPLOY_BASE_ALIYUN
+  stage: deploy_prod
+  script:
+    - ./ci/helm_deploy.sh aliyun prod aigc
+  environment:
+    name: service-prod
+  only:
+    - master
+    - tags
+  when: manual
+
+deploy_worker_prod:
+    <<: *DEPLOY_BASE_ALIYUN
+    stage: deploy_prod
+    script:
+        - ./ci/helm_deploy.sh aliyun prod aigc-worker
+    environment:
+        name: worker-prod
+    only:
+        - master
+        - tags
+    when: manual
+
+deploy_flower_prod:
+    <<: *DEPLOY_BASE_ALIYUN
+    stage: deploy_prod
+    script:
+        - ./ci/helm_deploy.sh aliyun prod aigc-flower
+    environment:
+        name: flower-prod
+    only:
+        - master
+        - tags
+    when: manual
