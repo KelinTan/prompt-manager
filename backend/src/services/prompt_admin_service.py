@@ -280,8 +280,8 @@ class PromptAdminService:
     async def _build_prompt_responses(
             self, prompts: list[Prompt]
     ) -> list[PromptResponse]:
-        # Use list comprehension directly for better performance
-        # This is not N+1 as each prompt object already has all needed data
+        # Use direct loop for better performance
+        # This avoids unnecessary async overhead as all data is already loaded
         responses = []
         for prompt in prompts:
             responses.append(PromptResponse(

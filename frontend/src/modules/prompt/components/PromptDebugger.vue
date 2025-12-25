@@ -919,13 +919,20 @@ export default {
               totalCharCount.value = fullText.value.length
 
               // Use requestAnimationFrame for smoother character-by-character display
+              // Limit animation to avoid excessive recursion
               const newChars = chunk.length
               const startCount = visibleCharCount.value
+              const maxFrames = Math.min(newChars, 100) // Limit to 100 frames per chunk
+              let frameCount = 0
               
               const animateChars = () => {
-                if (visibleCharCount.value < startCount + newChars && visibleCharCount.value < totalCharCount.value) {
+                if (frameCount < maxFrames && visibleCharCount.value < startCount + newChars && visibleCharCount.value < totalCharCount.value) {
                   visibleCharCount.value++
+                  frameCount++
                   requestAnimationFrame(animateChars)
+                } else if (visibleCharCount.value < startCount + newChars) {
+                  // If we hit the frame limit, show remaining characters immediately
+                  visibleCharCount.value = Math.min(startCount + newChars, totalCharCount.value)
                 }
               }
               
