@@ -9,12 +9,14 @@ Prompt Manager 是一个企业级的提示词(Prompt)管理平台，专为 AI �
 ### 主要功能
 
 - **Prompt 管理**
-  - 创建、编辑、删除 Prompt
+  <img width="1764" height="806" alt="image" src="https://github.com/user-attachments/assets/d044abff-4292-4058-a1a5-428a78e19e64" />
+  - 创建、编辑、预览、删除 Prompt
   - 版本管理和历史记录
   - Prompt 发布和生效管理
   - 启用/禁用 Prompt 状态控制
-
+  
 - **Prompt 调试**
+
   - 实时 Prompt 测试
   - 支持多种 AI 提供商
   - 支持多模态输入(文本、图片、文档)
@@ -22,11 +24,15 @@ Prompt Manager 是一个企业级的提示词(Prompt)管理平台，专为 AI �
   - 自定义返回类型和大小
 
 - **版本管理**
+  <img width="1166" height="958" alt="image" src="https://github.com/user-attachments/assets/f112ae20-3761-4ff1-ba70-dbed17d0b1ca" />
+
   - 完整的版本历史记录
   - 版本回滚功能
   - 变更追踪
 
 - **AI 助手**
+  <img width="1154" height="987" alt="image" src="https://github.com/user-attachments/assets/0b4ccb10-9ace-41a8-8533-8b980b541f4e" />
+
   - 实时 AI 对话助手
   - 支持多个 AI 提供商
 
