@@ -1,120 +1,335 @@
-# AIGC Admin
+# Prompt Manager
 
-企业级 AIGC 管理平台，基于 Vue3 + Vite + Element Plus 构建，支持 Prompt 模板管理和 AI 任务管理。
+一个功能完整的 Prompt 管理系统，提供 Prompt 的创建、编辑、版本控制、发布和调试等全套功能。
 
-## 功能特性
+## 📋 项目简介
 
-### Prompt 管理模块
-- ✅ **Prompt 管理**：增删改查、模板内容、Mock 数据配置
-- ✅ **搜索与筛选**：按标题、供应商等条件搜索
-- ✅ **版本控制**：每次发布/回滚自动生成新版本，支持历史版本查看
-- ✅ **历史记录**：时间线展示所有历史版本，支持版本详情、对比、回滚
-- ✅ **回滚功能**：可一键回滚到任意历史版本
-- ✅ **发布功能**：支持草稿/已发布状态切换
-- ✅ **AI 助手**：智能对话助手
+Prompt Manager 是一个企业级的提示词(Prompt)管理平台，专为 AI 应用开发团队设计。它提供了一套完整的工具来管理、版本控制和优化 AI 提示词，支持多种 AI 服务商(OpenAI、阿里云 DashScope 等)的集成。
 
-### Task 管理模块
-- ✅ **任务列表**：卡片式展示所有 AI 生成任务
-- ✅ **任务筛选**：按类型、状态、时间等条件筛选
-- ✅ **任务详情**：查看任务参数、结果、执行日志
-- ✅ **任务重试**：失败任务重试
-- ✅ **实时状态**：任务状态实时更新
+### 主要功能
 
-### 通用功能
-- ✅ **统一登录**：支持多模块共享登录状态
-- ✅ **响应式设计**：适配多端，现代化 UI
-- ✅ **模块化架构**：清晰的代码组织，便于维护和扩展
+- **Prompt 管理**
+  - 创建、编辑、删除 Prompt
+  - 版本管理和历史记录
+  - Prompt 发布和生效管理
+  - 启用/禁用 Prompt 状态控制
 
-## 技术栈
+- **Prompt 调试**
+  - 实时 Prompt 测试
+  - 支持多种 AI 提供商
+  - 支持多模态输入(文本、图片、文档)
+  - 流式响应输出
+  - 自定义返回类型和大小
 
-- Vue 3.x (Composition API)
-- Vite 5.x
-- Element Plus 2.x
-- Vue Router 4.x
-- Axios
+- **版本管理**
+  - 完整的版本历史记录
+  - 版本回滚功能
+  - 变更追踪
 
-## 快速开始
+- **AI 助手**
+  - 实时 AI 对话助手
+  - 支持多个 AI 提供商
+
+- **权限管理**
+  - JWT 认证机制
+  - 管理员权限验证
+  - 用户身份追踪
+
+## 🛠 技术栈
+
+### 后端
+
+- **框架**: FastAPI 0.110.0
+- **Python**: 3.11+
+- **数据库**: MySQL (使用 SQLModel ORM)
+- **异步**: asyncio、aiomysql
+- **认证**: JWT (PyJWT)
+- **AI 集成**:
+  - OpenAI API
+  - 阿里云 DashScope
+- **其他**:
+  - Pydantic (数据验证)
+  - Alembic (数据库迁移)
+  - Uvicorn (ASGI 服务器)
+
+### 前端
+
+- **框架**: Vue.js 3.4.29
+- **UI 框架**: Element Plus 2.7.6
+- **构建工具**: Vite 5.3.1
+- **路由**: Vue Router 4.3.3
+- **HTTP 客户端**: Axios 1.7.2
+- **编辑功能**:
+  - Markdown 编辑和预览 (markdown-it)
+  - 代码高亮 (highlight.js)
+  - Diff 对比显示
+
+## 🚀 快速开始
+
+### 前置要求
+
+- Python 3.11+
+- Node.js 16+
+- MySQL 5.7+
+- Poetry (Python 依赖管理)
+
+### 后端安装
 
 ```bash
+cd backend
+
+# 复制环境配置文件
+cp .env.example .env
+# 编辑 .env 文件，配置数据库和 API 密钥等
+
+# 编辑数据库配置
+vim alembic.ini
+# 修改 sqlalchemy.url 为你的数据库连接字符串
+
+# 安装依赖
+pip install poetry==1.8.2
+poetry install
+
+# 数据库迁移
+poetry run alembic upgrade head
+
+# 启动服务
+poetry run uvicorn src.main:app --reload --host 0.0.0.0 --port 8000
+```
+
+### 前端安装
+
+```bash
+cd frontend
+
+# 安装依赖
 npm install
+
+# 开发模式运行
 npm run dev
-# 访问 http://localhost:3000
+
+# 构建生产版本
+npm run build:prod
+
+# 构建测试版本
+npm run build:beta
 ```
 
-## 构建与预览
+### 使用 Docker 启动
 
 ```bash
-npm run build      # 生产环境构建
-npm run preview    # 预览生产环境
+cd backend
+
+# 构建镜像
+docker build -t prompt-manager:latest .
+
+# 运行容器
+docker run -p 8000:8000 --env-file .env prompt-manager:latest
 ```
 
-## 主要页面
-
-### Prompt 模块
-- **Prompt 列表页**：卡片式展示，支持搜索、分页、发布、历史、删除
-- **Prompt 编辑页**：新建/编辑，支持所有字段和 Mock 数据
-- **历史版本页**：时间线展示，支持版本详情、对比、回滚
-- **版本详情页**：查看特定版本内容，支持恢复
-- **AI 助手页**：智能对话助手
-
-#### 版本与回滚说明
-
-- 每次发布或回滚都会生成一个新版本，历史记录完整保留
-- 当前版本以绿色标签标识，历史版本可随时回滚
-- 回滚后自动刷新页面，当前版本标签始终准确
-
-### Task 模块
-- **任务列表页**：表格式展示，支持筛选、分页、查看详情
-- **任务详情页**：查看任务完整信息、参数、结果
-
-## API 接口
-
-### Prompt API
-- `GET /api/prompts`：获取列表
-- `GET /api/prompts/:id`：获取详情
-- `POST /api/prompts`：新建
-- `PUT /api/prompts/:id`：更新
-- `DELETE /api/prompts/:id`：删除
-- `POST /api/prompts/:id/publish`：发布
-- `GET /api/prompts/:id/history`：历史版本
-- `POST /api/prompts/:id/rollback`：回滚到历史版本
-
-### Task API
-- `GET /api/tasks`：获取任务列表
-- `POST /api/tasks/:uuid/retry`：重试任务
-- `GET /api/tasks/type`：获取任务类型列表
-
-### Auth API
-- `POST /api/auth/login`：用户登录
-
-## 项目结构
+## 📁 项目结构
 
 ```
-src/
-  modules/
-    prompt/      # Prompt 模块
-      api/       # Prompt API
-      models/    # Prompt 数据模型
-      views/     # Prompt 页面
-      components/ # Prompt 组件
-      config/    # Prompt 配置
-    task/        # Task 模块
-      api/       # Task API
-      models/    # Task 数据模型
-      views/     # Task 页面
-      components/ # Task 组件
-    common/      # 公共模块
-      api/       # 公共 API (auth, request)
-      stores/    # 状态管理
-      utils/     # 工具函数
-      views/     # 公共页面 (Login)
-  router/        # 路由配置
-  style/         # 全局样式
-  App.vue        # 根组件
-  main.js        # 入口
+prompt-manager/
+├── backend/                    # 后端应用
+│   ├── src/
+│   │   ├── main.py            # 应用入口
+│   │   ├── apis/              # API 路由
+│   │   │   ├── prompt_admin_api.py    # Prompt 管理 API
+│   │   │   └── login_admin_api.py     # 登录 API
+│   │   ├── models/            # 数据模型
+│   │   │   └── prompt.py      # Prompt 数据模型
+│   │   ├── services/          # 业务逻辑层
+│   │   │   └── prompt_admin_service.py
+│   │   ├── repository/        # 数据访问层
+│   │   │   └── prompt_repository.py
+│   │   ├── aigc/              # AI 集成模块
+│   │   │   ├── aigc.py
+│   │   │   ├── openai_proxy.py
+│   │   │   └── multi_modal.py
+│   │   └── core/              # 核心功能
+│   │       ├── config.py      # 配置管理
+│   │       ├── db.py          # 数据库连接
+│   │       └── jwt_verify.py  # JWT 验证
+│   ├── alembic/               # 数据库迁移
+│   ├── pyproject.toml         # Poetry 依赖配置
+│   └── Dockerfile             # Docker 镜像配置
+│
+└── frontend/                   # 前端应用
+    ├── src/
+    │   ├── main.js            # 应用入口
+    │   ├── App.vue            # 根组件
+    │   ├── router/            # 路由配置
+    │   ├── modules/           # 功能模块
+    │   │   ├── prompt/        # Prompt 模块
+    │   │   │   ├── views/     # 页面
+    │   │   │   ├── components/ # 组件
+    │   │   │   └── api/       # API 请求
+    │   │   └── common/        # 公共模块
+    │   └── style/             # 样式文件
+    ├── package.json           # NPM 依赖配置
+    ├── vite.config.js         # Vite 构建配置
+    └── index.html             # HTML 入口
 ```
 
-## 环境变量
+## 🔑 核心 API
 
-- `.env.development` - 开发环境
-- `.env.production` - 生产环境
+### Prompt 管理
+
+- `POST /admin/api/prompts` - 创建 Prompt
+- `PUT /admin/api/prompts/{prompt_id}` - 更新 Prompt
+- `GET /admin/api/prompts/{prompt_id}` - 获取 Prompt 详情
+- `GET /admin/api/prompts` - 列表查询
+- `POST /admin/api/prompts/{prompt_id}/publish` - 发布 Prompt
+- `POST /admin/api/prompts/{prompt_id}/enable` - 启用 Prompt
+- `POST /admin/api/prompts/{prompt_id}/disable` - 禁用 Prompt
+- `GET /admin/api/prompts/{prompt_id}/history` - 获取版本历史
+- `POST /admin/api/prompts/{prompt_id}/rollback` - 版本回滚
+
+### Prompt 调试
+
+- `POST /admin/api/prompts/{prompt_id}/debug` - 调试 Prompt
+- `POST /admin/api/prompts/{prompt_id}/synthesis` - 合成 Prompt
+
+### 认证
+
+- `POST /admin/api/login` - 用户登录
+
+## ⚙️ 配置说明
+
+### 环境变量配置 (.env)
+
+```env
+# 应用配置
+APP_ENV=development
+APP_PORT=8000
+
+# 数据库配置
+DATABASE_URL=mysql+aiomysql://user:password@localhost:3306/prompt_manager
+
+# JWT 配置
+JWT_SECRET_KEY=your-secret-key
+JWT_ALGORITHM=HS256
+JWT_EXPIRE_HOURS=24
+
+# OpenAI 配置
+OPENAI_API_KEY=sk-...
+OPENAI_BASE_URL=https://api.openai.com/v1
+
+# DashScope 配置
+DASHSCOPE_API_KEY=sk-...
+
+# 日志配置
+LOG_LEVEL=INFO
+```
+
+## 🧪 测试
+
+### 后端测试
+
+```bash
+cd backend
+
+# 运行所有测试
+poetry run pytest
+
+# 运行带覆盖率的测试
+poetry run pytest --cov=src
+
+# 运行特定测试文件
+poetry run pytest tests/test_prompt.py
+```
+
+### 前端测试
+
+```bash
+cd frontend
+
+# 运行 ESLint 检查
+npm run lint
+
+# 自动修复 ESLint 问题
+npm run lint:fix
+
+# 代码格式化
+npm run format
+
+# 检查代码格式
+npm run format:check
+```
+
+## 📝 数据库迁移
+
+使用 Alembic 管理数据库版本:
+
+```bash
+cd backend
+
+# 生成新的迁移文件
+poetry run alembic revision --autogenerate -m "description"
+
+# 应用所有待迁移的版本
+poetry run alembic upgrade head
+
+# 回滚到上一个版本
+poetry run alembic downgrade -1
+```
+
+## 🐳 Docker 部署
+
+项目包含 Docker 支持:
+
+```bash
+# 构建镜像
+docker build -t prompt-manager:latest .
+
+# 运行容器
+docker run -d \
+  --name prompt-manager \
+  -p 8000:8000 \
+  -e DATABASE_URL=mysql+aiomysql://user:password@db:3306/prompt_manager \
+  -e OPENAI_API_KEY=your-key \
+  prompt-manager:latest
+
+# 使用 Docker Compose
+docker-compose up -d
+```
+
+## 📚 API 文档
+
+启动后端服务后，可以访问 OpenAPI 文档:
+
+- **Swagger UI**: http://localhost:8000/docs
+- **ReDoc**: http://localhost:8000/redoc
+
+## 🤝 贡献指南
+
+欢迎提交 Issue 和 Pull Request！
+
+## 📄 许可证
+
+MIT License
+
+## 👥 作者
+
+- Kelin Tan
+
+## 🎯 项目路线图
+
+- [ ] 支持更多 AI 提供商(Google, Claude 等)
+- [ ] 增强的版本对比功能
+- [ ] Prompt 模板库
+- [ ] 性能监控和统计分析
+- [ ] 团队协作功能
+- [ ] 导入/导出功能
+
+## 📧 联系方式
+
+如有问题或建议，欢迎通过以下方式联系:
+
+- GitHub Issues: [提交问题](../../issues)
+- Email: kelin.tan@hotmail.com
+
+---
+
+**最后更新**: 2024年12月

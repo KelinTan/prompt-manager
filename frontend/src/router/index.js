@@ -44,15 +44,6 @@ const routes = [
     component: () => import('@/modules/prompt/views/PromptVersion.vue'),
     meta: { title: 'Prompt 版本详情', requiresAuth: true, module: 'prompt' }
   },
-
-  // ========== Task 模块 ==========
-  {
-    path: '/tasks',
-    name: 'TaskList',
-    component: () => import('@/modules/task/views/TaskList.vue'),
-    meta: { title: '任务列表', requiresAuth: true, module: 'task' }
-  },
-
   // ========== AI 助手 ==========
   {
     path: '/ai-assistant',
@@ -73,7 +64,7 @@ router.beforeEach((to, from, next) => {
 
   // 设置页面标题
   if (to.meta.title) {
-    document.title = `${to.meta.title} - AIGC Admin`
+    document.title = `${to.meta.title} - Prompt Manager`
   }
 
   // 检查是否需要认证

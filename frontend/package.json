@@ -1,5 +1,5 @@
 {
-  "name": "aigc-admin",
+  "name": "prompt-manager",
   "private": true,
   "version": "1.0.0",
   "type": "module",

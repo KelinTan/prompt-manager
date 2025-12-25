@@ -19,9 +19,9 @@
               </defs>
             </svg>
           </div>
-          <h1>AIGC Admin</h1>
+          <h1>Prompt Manager</h1>
         </div>
-        <p class="login-subtitle">AI 内容生成管理平台</p>
+        <p class="login-subtitle">欢迎登录您的账户</p>
       </div>
 
       <el-form
@@ -71,7 +71,7 @@
     </div>
 
     <div class="login-footer">
-      <p>&copy; 2025 AIGC Admin. All rights reserved.</p>
+      <p>&copy; 2025 Prompt Manager. All rights reserved.</p>
     </div>
   </div>
 </template>

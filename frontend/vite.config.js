@@ -14,7 +14,6 @@ export default defineConfig(({ command, mode }) => {
       alias: {
         '@': resolve(__dirname, 'src'),
         '@prompt': resolve(__dirname, 'src/modules/prompt'),
-        '@task': resolve(__dirname, 'src/modules/task'),
         '@common': resolve(__dirname, 'src/modules/common')
       }
     },
@@ -40,7 +39,7 @@ export default defineConfig(({ command, mode }) => {
     // 根据环境设置 base 路径
     // 本地开发: 相对路径
     // 测试/生产环境: OSS 部署路径
-    base: (mode === 'production' || mode === 'beta') ? '/aigc-admin/' : './',
+    base: (mode === 'production' || mode === 'beta') ? '/prompt-manager/' : './',
     define: {
       // 让环境变量在客户端代码中可用
       __APP_ENV__: JSON.stringify(env.APP_ENV),

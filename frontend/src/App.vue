@@ -36,10 +36,6 @@
               <el-icon><Document /></el-icon>
               <span>Prompt管理</span>
             </router-link>
-            <router-link to="/tasks" class="nav-link" :class="{ active: isTaskRoute }">
-              <el-icon><List /></el-icon>
-              <span>任务列表</span>
-            </router-link>
             <router-link
               to="/ai-assistant"
               class="nav-link"
@@ -113,9 +109,6 @@ export default {
     // 检查是否为Prompt相关路由
     const isPromptRoute = computed(() => route.path.startsWith('/prompts'))
 
-    // 检查是否为Task相关路由
-    const isTaskRoute = computed(() => route.path.startsWith('/tasks'))
-
     // 用户操作处理
     const handleUserCommand = async command => {
       if (command === 'logout') {
@@ -145,7 +138,6 @@ export default {
       appTitle,
       isLoginPage,
       isPromptRoute,
-      isTaskRoute,
       route,
       authStore,
       handleUserCommand
