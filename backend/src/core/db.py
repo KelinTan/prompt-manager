@@ -12,19 +12,21 @@ SYNC_DATABASE_URL = f"mysql+pymysql://{settings.db_user}:{settings.db_password}@
 engine = create_engine(
     SYNC_DATABASE_URL,
     pool_pre_ping=True,  # 检测连接是否可用
-    pool_recycle=1800,  # 连接回收时间
-    pool_size=10,  # 连接池大小
-    max_overflow=20,  # 超出连接池大小外最多创建的连接数
+    pool_recycle=3600,  # 连接回收时间 (1 hour, increased from 30 min for better reuse)
+    pool_size=20,  # 连接池大小 (increased for better concurrency)
+    max_overflow=30,  # 超出连接池大小外最多创建的连接数
     echo=False,  # 是否打印SQL日志
+    pool_timeout=30,  # 从池中获取连接的超时时间
 )
 # 异步引擎
 async_engine = create_async_engine(
     ASYNC_DATABASE_URL,
     pool_pre_ping=True,
-    pool_recycle=1800,
-    pool_size=10,
-    max_overflow=20,
+    pool_recycle=3600,  # Increased for better connection reuse
+    pool_size=20,  # Increased pool size for async operations
+    max_overflow=30,
     echo=False,
+    pool_timeout=30,  # Connection acquisition timeout
 )
 
 

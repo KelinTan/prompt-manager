@@ -22,7 +22,7 @@
                 size="large"
                 clearable
                 @clear="handleSearch"
-                @keyup.enter="handleSearch"
+                @input="handleSearch"
               >
                 <template #prefix>
                   <el-icon class="search-icon"><Search /></el-icon>
@@ -225,6 +225,7 @@ import { ElMessage, ElMessageBox } from 'element-plus'
 import { promptApi } from '@/modules/prompt/api/prompt'
 import { FORMAT_TYPE_OPTIONS, PROMPT_STATUS_OPTIONS } from '@/modules/prompt/models/prompt'
 import { AI_PROVIDER_OPTIONS } from '@/modules/prompt/config/ai'
+import { debounce } from '@/modules/common/utils/debounce'
 
 const SEARCH_STORAGE_KEY = 'promptListSearchState'
 const PAGINATION_STORAGE_KEY = 'promptListPaginationState'
@@ -298,7 +299,7 @@ export default {
       return new Date(dateString).toLocaleString('zh-CN')
     }
 
-    // 加载数据
+    // 加载数据 (debounced version)
     const loadData = async () => {
       loading.value = true
       const params = {
@@ -320,10 +321,13 @@ export default {
       loading.value = false
     }
 
-    // 搜索
+    // Create debounced version of loadData for search operations
+    const debouncedLoadData = debounce(loadData, 500)
+
+    // 搜索 (使用防抖优化)
     const handleSearch = () => {
       pagination.page = 1
-      loadData()
+      debouncedLoadData()
     }
 
     // 重置搜索
@@ -439,20 +443,28 @@ export default {
       }
     }
 
-    // 监听搜索条件变化，保存到 sessionStorage
+    // 监听搜索条件变化，保存到 sessionStorage (使用节流优化)
+    const saveSearchState = debounce(() => {
+      sessionStorage.setItem(SEARCH_STORAGE_KEY, JSON.stringify(searchForm))
+    }, 1000)
+
     watch(
       searchForm,
-      newVal => {
-        sessionStorage.setItem(SEARCH_STORAGE_KEY, JSON.stringify(newVal))
+      () => {
+        saveSearchState()
       },
       { deep: true }
     )
 
-    // 监听分页状态变化，保存到 sessionStorage
+    // 监听分页状态变化，保存到 sessionStorage (使用节流优化)
+    const savePaginationState = debounce(() => {
+      sessionStorage.setItem(PAGINATION_STORAGE_KEY, JSON.stringify(pagination))
+    }, 1000)
+
     watch(
       pagination,
-      newVal => {
-        sessionStorage.setItem(PAGINATION_STORAGE_KEY, JSON.stringify(newVal))
+      () => {
+        savePaginationState()
       },
       { deep: true }
     )

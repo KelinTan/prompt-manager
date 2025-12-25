@@ -2,7 +2,7 @@ from datetime import datetime, timezone
 from enum import StrEnum
 from typing import Optional
 
-from sqlalchemy import JSON, Column
+from sqlalchemy import JSON, Column, Index
 from sqlmodel import Field, SQLModel
 
 from src.aigc.aigc import AiProvider, CompletionReturnType
@@ -43,6 +43,21 @@ class PromptStatus(StrEnum):
 
 
 class Prompt(SQLModel, table=True):
+    __tablename__ = "prompt"
+    
+    # Performance indexes defined at model level
+    __table_args__ = (
+        Index('idx_prompt_is_latest', 'is_latest'),
+        Index('idx_prompt_status', 'status'),
+        Index('idx_prompt_enabled', 'enabled'),
+        Index('idx_prompt_root_id', 'root_id'),
+        Index('idx_prompt_ai_provider', 'ai_provider'),
+        Index('idx_prompt_name', 'name'),
+        Index('idx_prompt_latest_status_enabled', 'is_latest', 'status', 'enabled'),
+        Index('idx_prompt_updated_at', 'updated_at'),
+        Index('idx_prompt_root_id_version', 'root_id', 'version'),
+    )
+    
     id: Optional[int] = Field(default=None, primary_key=True)
     title: str | None = Field(nullable=True)
     name: str

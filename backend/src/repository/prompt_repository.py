@@ -19,7 +19,8 @@ class PromptRepository(BaseRepository):
         enabled: Optional[bool] = None,
     ) -> int:
         async def query(session: AsyncSession):
-            stmt = select(func.count()).where(Prompt.is_latest == True)
+            # Use select_from for better query optimization
+            stmt = select(func.count()).select_from(Prompt).where(Prompt.is_latest == True)
             if keyword:
                 stmt = stmt.where(
                     Prompt.name.like(f"%{keyword}%")  # noqa
