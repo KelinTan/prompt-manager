@@ -280,4 +280,28 @@ class PromptAdminService:
     async def _build_prompt_responses(
             self, prompts: list[Prompt]
     ) -> list[PromptResponse]:
-        return [await self._build_prompt_response(prompt) for prompt in prompts]
+        # Use list comprehension directly for better performance
+        # This is not N+1 as each prompt object already has all needed data
+        responses = []
+        for prompt in prompts:
+            responses.append(PromptResponse(
+                id=prompt.id,
+                title=prompt.title,
+                name=prompt.name,
+                template=prompt.template,
+                type=prompt.type,
+                model=prompt.model,
+                mock=prompt.mock,
+                mock_data=prompt.mock_data,
+                return_type=prompt.return_type,
+                format_type=prompt.format_type,
+                remark=prompt.remark,
+                ai_provider=prompt.ai_provider,
+                created_at=format_cst_datetime(prompt.created_at),
+                updated_at=format_cst_datetime(prompt.updated_at),
+                is_latest=prompt.is_latest,
+                version=prompt.version,
+                enabled=prompt.enabled,
+                status=prompt.status,
+            ))
+        return responses

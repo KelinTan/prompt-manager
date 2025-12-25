@@ -61,19 +61,17 @@ class OpenAiProxy:
             f"invoke_openai_stream: ai_provider: {self.ai_provider}, model: {model}, messages: {json.dumps(openai_messages, ensure_ascii=False)}, params: {json.dumps(params, ensure_ascii=False)}"
         )
 
-        def _sync_stream():
-            # noinspection PyTypeChecker
-            return self.client.chat.completions.create(
+        try:
+            # Use async client directly for better performance
+            stream = await self.async_client.chat.completions.create(
                 model=model,
-                messages=messages,
+                messages=openai_messages,
                 stream=True,
                 stream_options={"include_usage": True},
                 **params,
             )
-
-        try:
-            stream = await asyncio.to_thread(_sync_stream)
-            for chunk in stream:
+            
+            async for chunk in stream:
                 if chunk.choices:
                     content = chunk.choices[0].delta.content or ""
                     if content:

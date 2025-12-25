@@ -913,29 +913,23 @@ export default {
               max_tokens: debugConfig.value.maxTokens
             },
             chunk => {
-              // 累积完整文本
+              // Accumulate text in buffer
+              streamBuffer.value += chunk
               fullText.value += chunk
               totalCharCount.value = fullText.value.length
 
-              // 逐字符显示新接收的内容
-              const newChars = chunk.split('')
-              let charIndex = 0
-
-              const showNextChar = () => {
-                if (charIndex < newChars.length && visibleCharCount.value < totalCharCount.value) {
+              // Use requestAnimationFrame for smoother character-by-character display
+              const newChars = chunk.length
+              const startCount = visibleCharCount.value
+              
+              const animateChars = () => {
+                if (visibleCharCount.value < startCount + newChars && visibleCharCount.value < totalCharCount.value) {
                   visibleCharCount.value++
-                  charIndex++
-
-                  // 继续显示下一个字符
-                  setTimeout(showNextChar, 30)
+                  requestAnimationFrame(animateChars)
                 }
               }
-
-              // 开始逐字显示
-              showNextChar()
-
-              // 保持向后兼容
-              streamBuffer.value += chunk
+              
+              requestAnimationFrame(animateChars)
             }
           )
 
